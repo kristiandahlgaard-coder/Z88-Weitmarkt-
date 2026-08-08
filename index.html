@@ -160,11 +160,6 @@
                 </div>
                 <div id="calendar-weeks"></div>
             </div>
-
-            <div class="section">
-                <h2 id="weitervermiet-count">Weitervermiete Stunden (0)</h2>
-                <div id="weitervermiet-list"></div>
-            </div>
         </div>
     </div>
 
@@ -326,6 +321,7 @@
             document.querySelectorAll('[id$="-login"], [id$="-reg"], [id$="-dashboard"]').forEach(el => el.classList.add('hidden'));
             document.getElementById(screen)?.classList.remove('hidden');
             appState.currentScreen = screen;
+            window.scrollTo(0, 0);
         }
 
         function fillDemoData() {
@@ -495,6 +491,7 @@
             const monthName = baseMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
             document.getElementById('month-display').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
             
+            // 1. DEINE ABOSTUNDEN (noch nicht freigegeben)
             const monthStunden = mieter.abostunden.filter(s => {
                 const sDate = new Date(s.datum.split('.').reverse().join('-'));
                 return sDate.getMonth() === baseMonth.getMonth() && sDate.getFullYear() === baseMonth.getFullYear();
@@ -516,24 +513,79 @@
                     `;
                 }).join('');
             
-            // Weitervermiete Stunden
-            const weitervermiet = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
-            document.getElementById('weitervermiet-count').textContent = `Weitervermiete Stunden (${weitervermiet.length})`;
-            const weitermietList = document.getElementById('weitervermiet-list');
-            weitermietList.innerHTML = weitervermiet.length === 0 ? '<p style="color: #999;">Noch keine.</p>' :
-                weitervermiet.map(b => `
-                    <div class="card-item faded">
-                        <div class="card-left">
-                            <h3>${b.angebot.platz}</h3>
-                            <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
-                            <div class="price-info">
-                                <p style="font-weight: bold;">✓ Weitervermietet an:</p>
-                                <p>${b.spielerName}</p>
-                                <p style="color: #666;">${b.spielerEmail}</p>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
+            // 2. FREIGEGEBENE STUNDEN (noch zu verkaufen)
+            const freigegebenStunden = appState.zweitmarktAngebote.filter(a => a.mieterId === appState.currentEmail);
+            
+            const freigebenSection = `
+                <div class="section">
+                    <h2>📤 Freigegebene Stunden (${freigegebenStunden.length})</h2>
+                    ${freigegebenStunden.length === 0 ? '<p style="color: #999;">Noch keine Stunden freigegeben.</p>' :
+                        freigegebenStunden.map(a => {
+                            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
+                            return `
+                                <div class="card-item" style="background: #f0fdf4; border-left-color: #16a34a;">
+                                    <div class="card-left">
+                                        <h3>${a.platz}</h3>
+                                        <p>${a.datum} • ${a.uhrzeit}</p>
+                                        <div class="price-info">
+                                            <p style="font-size: 12px; color: #666;">Original: €${a.originalMiete}</p>
+                                            <p style="font-weight: bold; color: #16a34a;">Du erhältst: €${a.verkaufspreis.toFixed(2)}</p>
+                                            <p style="font-size: 11px; color: #999;">Spieler zahlt: €${spielerZahlt.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                </div>
+            `;
+            
+            // 3. VERKAUFTE STUNDEN (bereits gebucht)
+            const verkauftStunden = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
+            
+            const verkauftSection = `
+                <div class="section">
+                    <h2>✅ Verkaufte Stunden (${verkauftStunden.length})</h2>
+                    ${verkauftStunden.length === 0 ? '<p style="color: #999;">Noch keine verkauften Stunden.</p>' :
+                        verkauftStunden.map(b => {
+                            const spielerZahlt = b.angebot.verkaufspreis + (b.angebot.verkaufspreis * 0.1);
+                            return `
+                                <div class="card-item faded" style="background: #f3f4f6; border-left-color: #9ca3af;">
+                                    <div class="card-left">
+                                        <h3>${b.angebot.platz}</h3>
+                                        <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
+                                        <div class="price-info">
+                                            <p style="font-weight: bold;">Gebucht von:</p>
+                                            <p>${b.spielerName}</p>
+                                            <p style="color: #666; font-size: 12px;">${b.spielerEmail}</p>
+                                            <p style="font-weight: bold; color: #ca8a04; margin-top: 6px;">Du erhältst: €${b.angebot.verkaufspreis.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                </div>
+            `;
+            
+            // Sections nach dem Kalender einfügen
+            const abostundenSection = document.querySelector('[id="calendar-weeks"]').closest('.section');
+            const abostundenTitle = abostundenSection.querySelector('h2');
+            abostundenTitle.textContent = '📅 Deine Abostunden';
+            
+            // Finde das nächste Element nach abostundenSection
+            const container = abostundenSection.parentElement;
+            const abostundenIndex = Array.from(container.children).indexOf(abostundenSection);
+            
+            // Entferne alte sections falls vorhanden
+            while (container.children[abostundenIndex + 1] && 
+                   (container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Freigegebene') ||
+                    container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Verkaufte') ||
+                    container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Weitervermiete'))) {
+                container.children[abostundenIndex + 1].remove();
+            }
+            
+            // Füge neue Sections ein
+            abostundenSection.insertAdjacentHTML('afterend', verkauftSection);
+            abostundenSection.insertAdjacentHTML('afterend', freigebenSection);
         }
 
         function previousMonth() {
