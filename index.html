@@ -38,7 +38,10 @@
         .btn-small { padding: 8px 12px; font-size: 13px; }
         
         /* DASHBOARD */
-        .dashboard { background: #f8f9fa; }
+        .dashboard { background: #f8f9fa; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .dashboard::-webkit-scrollbar { width: 8px; }
+        .dashboard::-webkit-scrollbar-track { background: transparent; }
+        .dashboard::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
         .dashboard-header { background: #000; color: white; padding: 16px; border-bottom: 3px solid #facc15; flex-shrink: 0; }
         .dashboard-header-content { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
         .dashboard-header h1 { font-size: 24px; font-weight: 800; }
@@ -468,6 +471,18 @@
                     `;
                 }).join('');
             
+            // Mehrfach-Freigabe Button wenn Stunden ausgewählt sind
+            if (appState.selectedStunden && appState.selectedStunden.length > 0) {
+                const totalPrice = appState.selectedStunden.reduce((sum, s) => sum + s.originalMiete, 0);
+                calendarList.innerHTML += `
+                    <div class="info-banner" style="background: #fef3c7; border-left: 4px solid #ca8a04; margin-top: 16px; padding: 14px; text-align: center;">
+                        <strong>${appState.selectedStunden.length} Stunde(n) ausgewählt</strong><br>
+                        Gesamt-Miete: <strong style="color: #ca8a04;">€${totalPrice.toFixed(2)}</strong><br>
+                        <button class="btn btn-secondary" style="margin-top: 10px; width: 100%;" onclick="openMultiFreigabeModal()">📤 Mehrere Stunden freigeben</button>
+                    </div>
+                `;
+            }
+            
             const freigegebenStunden = appState.zweitmarktAngebote.filter(a => a.mieterId === appState.currentEmail);
             if (freigegebenStunden.length > 0) {
                 document.getElementById('released-section').style.display = 'block';
@@ -565,6 +580,67 @@
         function closeFreigabeModal() {
             document.getElementById('freigabe-modal').classList.add('hidden');
         }
+
+        function openMultiFreigabeModal() {
+            const selected = appState.selectedStunden || [];
+            const totalPrice = selected.reduce((sum, s) => sum + s.originalMiete, 0);
+            
+            document.getElementById('freigabe-title').textContent = `${selected.length} Stunde(n) freigeben`;
+            document.getElementById('freigabe-info').innerHTML = `
+                <div style="text-align: left; font-size: 13px; margin-bottom: 12px;">
+                    ${selected.map(s => `<div style="margin-bottom: 4px; color: #666;">📍 ${s.platz} • ${s.datum} ${s.uhrzeit}</div>`).join('')}
+                </div>
+                <strong>Gesamt-Miete: €${totalPrice.toFixed(2)}</strong>
+            `;
+            
+            document.getElementById('freigabe-options').innerHTML = [50, 60].map(percent => {
+                const verkaufspreis = (totalPrice * percent) / 100;
+                const vereinGebuehr = verkaufspreis * 0.1;
+                return `
+                    <button class="price-option" onclick="handleMultiFreigeben(${verkaufspreis})">
+                        <h4>${percent}% Rabatt = €${verkaufspreis.toFixed(2)}</h4>
+                        <div class="breakdown">
+                            <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                            <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            document.getElementById('freigabe-modal').classList.remove('hidden');
+        }
+
+        function handleMultiFreigeben(verkaufspreis) {
+            const selected = appState.selectedStunden || [];
+            if (selected.length === 0) return;
+            
+            // Preis pro Stunde berechnen
+            const preisProStunde = verkaufspreis / selected.length;
+            
+            // Alle ausgewählten Stunden verarbeiten
+            selected.forEach(stunde => {
+                appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stunde.id);
+                appState.zweitmarktAngebote.push({
+                    id: Math.random(),
+                    platz: stunde.platz,
+                    datum: stunde.datum,
+                    uhrzeit: stunde.uhrzeit,
+                    originalMiete: stunde.originalMiete,
+                    verkaufspreis: preisProStunde,
+                    mieterId: appState.currentEmail,
+                    verfügbar: true
+                });
+            });
+            
+            // Auswahl löschen
+            appState.selectedStunden = [];
+            
+            // Modal schließen
+            closeFreigabeModal();
+            
+            // Dashboard neu rendern
+            renderMieterDashboard();
+        }
+
 
         function renderSpielerDashboard() {
             document.getElementById('spieler-name-display').textContent = appState.currentUser.name;
