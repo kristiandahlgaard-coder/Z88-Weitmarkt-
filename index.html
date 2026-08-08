@@ -154,9 +154,9 @@
             <div class="section">
                 <h2>Deine Abostunden</h2>
                 <div class="calendar-nav">
-                    <button onclick="previousWeek()">← Vorherige</button>
-                    <div class="week-display" id="week-display">KW XX</div>
-                    <button onclick="nextWeek()">Nächste →</button>
+                    <button onclick="previousMonth()">← Vorheriger Monat</button>
+                    <div class="week-display" id="month-display">Oktober 2026</div>
+                    <button onclick="nextMonth()">Nächster Monat →</button>
                 </div>
                 <div id="calendar-weeks"></div>
             </div>
@@ -259,6 +259,7 @@
             selectedAngebote: [],
             selectedStunden: [],
             currentWeekOffset: 0,
+            currentMonthOffset: 0,
             
             mieterDB: {
                 'max.mueller@example.de': {
@@ -326,6 +327,57 @@
             document.getElementById('zahlungsart-typ').value = 'paypal';
             document.getElementById('zahlungsart-wert').value = 'max.mueller@paypal.com';
             updatePaymentInput();
+            
+            // Demo: Einige Stunden bereits vermietet
+            if (appState.confirmedListings.length === 0) {
+                appState.confirmedListings = [
+                    {
+                        id: 'demo1',
+                        angebot: {
+                            id: Math.random(),
+                            platz: 'Platz 1',
+                            datum: '07.10.2026',
+                            uhrzeit: '18:00-19:00',
+                            originalMiete: 28,
+                            verkaufspreis: 14,
+                            mieterId: 'max.mueller@example.de',
+                            mieterName: 'Max Müller',
+                        },
+                        spielerName: 'Anna Schmidt',
+                        spielerEmail: 'anna.schmidt@example.de',
+                    },
+                    {
+                        id: 'demo2',
+                        angebot: {
+                            id: Math.random(),
+                            platz: 'Platz 1',
+                            datum: '14.10.2026',
+                            uhrzeit: '19:00-20:00',
+                            originalMiete: 28,
+                            verkaufspreis: 16.80,
+                            mieterId: 'max.mueller@example.de',
+                            mieterName: 'Max Müller',
+                        },
+                        spielerName: 'Thomas König',
+                        spielerEmail: 'thomas.koenig@example.de',
+                    },
+                    {
+                        id: 'demo3',
+                        angebot: {
+                            id: Math.random(),
+                            platz: 'Platz 1',
+                            datum: '21.10.2026',
+                            uhrzeit: '18:00-19:00',
+                            originalMiete: 28,
+                            verkaufspreis: 14,
+                            mieterId: 'max.mueller@example.de',
+                            mieterName: 'Max Müller',
+                        },
+                        spielerName: 'Julia Werner',
+                        spielerEmail: 'julia.werner@example.de',
+                    },
+                ];
+            }
         }
 
         function handleMieterLogin() {
@@ -335,7 +387,7 @@
             if (email === 'max.mueller@example.de' && number === '2024001') {
                 appState.currentUser = { ...appState.mieterDB[email] };
                 appState.currentEmail = email;
-                appState.currentWeekOffset = 0;
+                appState.currentMonthOffset = 0;
                 renderMieterDashboard();
                 goToScreen('mieter-dashboard');
             } else {
@@ -370,25 +422,22 @@
             }).join('<br>');
             document.getElementById('payment-info-display').innerHTML = paymentInfo;
             
-            // Kalender-Wochen anzeigen
-            const startDate = new Date(2026, 9, 7);
-            const weekStart = new Date(startDate);
-            weekStart.setDate(weekStart.getDate() + (appState.currentWeekOffset * 7));
+            // Kalender-Monate anzeigen
+            const startDate = new Date(2026, 9, 1); // Oktober 2026
+            const baseMonth = new Date(startDate);
+            baseMonth.setMonth(baseMonth.getMonth() + appState.currentMonthOffset);
             
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekEnd.getDate() + 6);
+            const monthName = baseMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+            document.getElementById('month-display').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
             
-            const weekNum = Math.floor((weekStart - startDate) / (7 * 24 * 60 * 60 * 1000)) + 1;
-            document.getElementById('week-display').textContent = `Woche ${weekNum} (${weekStart.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})} - ${weekEnd.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})})`;
-            
-            const weekStunden = mieter.abostunden.filter(s => {
+            const monthStunden = mieter.abostunden.filter(s => {
                 const sDate = new Date(s.datum.split('.').reverse().join('-'));
-                return sDate >= weekStart && sDate <= weekEnd;
+                return sDate.getMonth() === baseMonth.getMonth() && sDate.getFullYear() === baseMonth.getFullYear();
             });
             
             const calendarList = document.getElementById('calendar-weeks');
-            calendarList.innerHTML = weekStunden.length === 0 ? '<p style="color: #999;">Keine Stunden in dieser Woche</p>' :
-                weekStunden.map(s => {
+            calendarList.innerHTML = monthStunden.length === 0 ? '<p style="color: #999;">Keine Stunden in diesem Monat</p>' :
+                monthStunden.map(s => {
                     const isSelected = appState.selectedStunden && appState.selectedStunden.find(x => x.id === s.id);
                     return `
                         <div class="calendar-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer;" onclick="toggleStundenSelection(${s.id})">
@@ -422,14 +471,16 @@
                 `).join('');
         }
 
-        function previousWeek() {
-            appState.currentWeekOffset = Math.max(0, appState.currentWeekOffset - 1);
+        function previousMonth() {
+            appState.currentMonthOffset = Math.max(0, appState.currentMonthOffset - 1);
             renderMieterDashboard();
         }
 
-        function nextWeek() {
-            appState.currentWeekOffset++;
-            renderMieterDashboard();
+        function nextMonth() {
+            if (appState.currentMonthOffset < 5) { // Maximal bis März 2027
+                appState.currentMonthOffset++;
+                renderMieterDashboard();
+            }
         }
 
         function toggleStundenSelection(stundenId) {
@@ -788,6 +839,7 @@
         function closeEmailModal() {
             document.getElementById('email-modal').classList.add('hidden');
             renderSpielerDashboard();
+            appState.selectedAngebote = [];
         }
 
         function logout() {
