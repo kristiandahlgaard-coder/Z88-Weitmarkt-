@@ -748,6 +748,10 @@
             document.getElementById('buchung-modal').classList.remove('hidden');
         }
 
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
         function closeBuchungModal() {
             document.getElementById('buchung-modal').classList.add('hidden');
         }
@@ -850,13 +854,19 @@
                     <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${betrag.toFixed(2)}</p>
                 </div>
                 
-                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="confirmPaymentAndBook()">Buchung abschließen</button>
+                <button id="confirm-booking-btn" class="btn btn-yellow" style="width: 100%; padding: 12px;">Buchung abschließen</button>
             `;
+            
+            // Event Listener hinzufügen NACH dem innerHTML gesetzt wurde
+            setTimeout(() => {
+                const btn = document.getElementById('confirm-booking-btn');
+                if (btn) {
+                    btn.addEventListener('click', confirmPaymentAndBook);
+                }
+            }, 0);
         }
 
         function confirmPaymentAndBook() {
-            closePaymentModal();
-            
             const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
                 ? appState.selectedAngebote 
                 : [appState.selectedAngebot];
@@ -880,8 +890,12 @@
             appState.selectedAngebote = [];
             appState.selectedAngebot = null;
             
+            // Alle Modals schließen
+            document.getElementById('payment-modal').classList.add('hidden');
+            document.getElementById('buchung-modal').classList.add('hidden');
+            
+            // Email-Bestätigung zeigen
             showEmailConfirmation(angebote, totalBetrag);
-            closeBuchungModal();
         }
 
         function showEmailConfirmation(angebote, totalBetrag) {
