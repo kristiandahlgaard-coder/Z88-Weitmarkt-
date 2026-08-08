@@ -182,6 +182,7 @@
             </div>
             <div class="button-group">
                 <button class="btn btn-yellow" onclick="handleSpielerLogin()">Zu den freien Plätzen</button>
+                <button class="btn btn-yellow" onclick="fillSpielerDemoData()" style="background: #facc15; color: black;">🎾 Demo-Daten (Dirk)</button>
                 <button class="btn btn-gray" onclick="goToScreen('login')">Zurück</button>
             </div>
         </div>
@@ -378,6 +379,64 @@
                     },
                 ];
             }
+            
+            // Direkt einloggen
+            appState.currentUser = { ...appState.mieterDB['max.mueller@example.de'] };
+            appState.currentEmail = 'max.mueller@example.de';
+            appState.currentMonthOffset = 0;
+            renderMieterDashboard();
+            goToScreen('mieter-dashboard');
+        }
+
+        function fillSpielerDemoData() {
+            document.getElementById('spieler-name').value = 'Dirk';
+            document.getElementById('spieler-email').value = 'Dirk@z88.de';
+            
+            // Demo: Einige freie Stunden von Mieter verfügbar
+            if (appState.zweitmarktAngebote.length === 0) {
+                appState.zweitmarktAngebote = [
+                    {
+                        id: Math.random(),
+                        platz: 'Platz 1',
+                        datum: '07.10.2026',
+                        uhrzeit: '19:00-20:00',
+                        originalMiete: 28,
+                        verkaufspreis: 14,
+                        mieterId: 'max.mueller@example.de',
+                        mieterName: 'Max Müller',
+                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
+                    },
+                    {
+                        id: Math.random(),
+                        platz: 'Platz 1',
+                        datum: '28.10.2026',
+                        uhrzeit: '18:00-19:00',
+                        originalMiete: 28,
+                        verkaufspreis: 16.80,
+                        mieterId: 'max.mueller@example.de',
+                        mieterName: 'Max Müller',
+                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
+                    },
+                    {
+                        id: Math.random(),
+                        platz: 'Platz 2',
+                        datum: '04.11.2026',
+                        uhrzeit: '19:00-20:00',
+                        originalMiete: 28,
+                        verkaufspreis: 14,
+                        mieterId: 'max.mueller@example.de',
+                        mieterName: 'Max Müller',
+                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
+                    },
+                ];
+            }
+            
+            // Direkt einloggen
+            appState.currentUser = { name: 'Dirk' };
+            appState.spielerEmail = 'Dirk@z88.de';
+            appState.currentEmail = `guest-dirk`;
+            renderSpielerDashboard();
+            goToScreen('spieler-dashboard');
         }
 
         function handleMieterLogin() {
