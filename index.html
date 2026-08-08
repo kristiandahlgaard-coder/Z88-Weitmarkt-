@@ -200,7 +200,10 @@
             </div>
         </div>
         <div class="content">
-            <div id="success-msg"></div>
+            <div class="section">
+                <h2 id="gebucht-count">Meine gebuchten Stunden (0)</h2>
+                <div id="gebucht-list"></div>
+            </div>
             <div class="section">
                 <h2 id="plaetze-count">Verfügbare Plätze (0)</h2>
                 <div id="plaetze-list"></div>
@@ -240,11 +243,14 @@
     </div>
 
     <!-- EMAIL-BESTÄTIGUNG MODAL -->
-    <div id="email-modal" class="hidden modal-overlay" onclick="if(event.target === this) closeEmailModal()">
-        <div class="modal" style="max-width: 600px;">
-            <h3 style="text-align: center; margin-bottom: 24px;">✅ Buchung erfolgreich!</h3>
+    <div id="email-modal" class="hidden modal-overlay" onclick="closeEmailModal()">
+        <div class="modal" style="max-width: 600px;" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0;">✅ Buchung erfolgreich!</h3>
+                <button class="btn btn-gray" style="padding: 4px 8px; font-size: 20px;" onclick="closeEmailModal()">✕</button>
+            </div>
             <div id="email-content"></div>
-            <button class="btn btn-yellow" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="closeEmailModal()">Fertig</button>
+            <button class="btn btn-yellow" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="closeEmailModal()">Dashboard anzeigen</button>
         </div>
     </div>
 
@@ -559,6 +565,32 @@
             document.getElementById('spieler-name-display').textContent = appState.currentUser.name;
             document.getElementById('plaetze-count').textContent = `Verfügbare Plätze (${appState.zweitmarktAngebote.length})`;
             
+            // Gebuchte Stunden anzeigen
+            const mineBookings = appState.confirmedListings.filter(b => b.spielerEmail === appState.spielerEmail);
+            document.getElementById('gebucht-count').textContent = `Meine gebuchten Stunden (${mineBookings.length})`;
+            const gebuchList = document.getElementById('gebucht-list');
+            gebuchList.innerHTML = mineBookings.length === 0 ? '<p style="color: #999;">Noch keine Buchungen.</p>' :
+                mineBookings.map(b => {
+                    const spielerZahlt = b.angebot.verkaufspreis + (b.angebot.verkaufspreis * 0.1);
+                    return `
+                        <div class="card-item" style="background: #fef3c7; border-left-color: #ca8a04;">
+                            <div class="card-left">
+                                <h3>${b.angebot.platz}</h3>
+                                <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
+                                <div class="price-info">
+                                    <p style="font-weight: bold;">Vermieter:</p>
+                                    <p>${b.angebot.mieterName}</p>
+                                    <p style="color: #666; font-size: 12px;">${b.angebot.mieterName === 'Max Müller' ? 'max.mueller@example.de' : 'email@example.de'}</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <p style="font-size: 12px; color: #666;">Betrag:</p>
+                                <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${spielerZahlt.toFixed(2)}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            
             const list = document.getElementById('plaetze-list');
             list.innerHTML = appState.zweitmarktAngebote.length === 0 ? 
                 '<p style="color: #999;">Keine Plätze verfügbar. Als Abonnent eine Stunde freigeben!</p>' :
@@ -866,14 +898,15 @@
                         <div class="email-booking">
                             <p style="font-weight: bold; margin-bottom: 12px;">📋 Buchungsdetails:</p>
                             ${angebote.map((a, i) => `
-                                <div style="margin-bottom: 12px;">
+                                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #d1d5db;">
                                     <p><strong>Stunde ${i + 1}:</strong> ${a.platz}</p>
                                     <p>📅 ${a.datum}</p>
                                     <p>⏰ ${a.uhrzeit}</p>
-                                    <p>💰 €${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
+                                    <p style="color: #999;">Vermieter: ${a.mieterName}</p>
+                                    <p style="font-weight: bold; color: #ca8a04;">💰 €${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
                                 </div>
                             `).join('')}
-                            <p style="border-top: 1px solid #d1d5db; padding-top: 12px; margin-top: 12px; font-weight: bold;">
+                            <p style="font-weight: bold; margin-top: 12px;">
                                 Gesamtbetrag: €${totalBetrag.toFixed(2)}
                             </p>
                         </div>
@@ -890,15 +923,11 @@
             
             document.getElementById('email-content').innerHTML = emailHTML;
             document.getElementById('email-modal').classList.remove('hidden');
-            
-            document.getElementById('success-msg').innerHTML = '<div class="success">✅ Buchung erfolgreich! Bestätigungs-Email wurde gesendet!</div>';
-            setTimeout(() => { document.getElementById('success-msg').innerHTML = ''; }, 5000);
         }
 
         function closeEmailModal() {
             document.getElementById('email-modal').classList.add('hidden');
             renderSpielerDashboard();
-            appState.selectedAngebote = [];
         }
 
         function logout() {
