@@ -222,9 +222,17 @@
             <div class="modal-box" id="buchung-info"></div>
             <div class="modal-box yellow" id="buchung-price"></div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="handleBuchungBestätigen()">💳 Zahlung bestätigen</button>
+                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="openPaymentModal()">💳 Zahlung bestätigen</button>
                 <button class="btn btn-gray" style="width: 100%;" onclick="closeBuchungModal()">Abbrechen</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ZAHLUNGS-MODAL -->
+    <div id="payment-modal" class="hidden modal-overlay" onclick="if(event.target === this) closePaymentModal()">
+        <div class="modal">
+            <h3 id="payment-step-title">Zahlungsmethode wählen</h3>
+            <div id="payment-content"></div>
         </div>
     </div>
 
@@ -254,6 +262,8 @@
             
             zweitmarktAngebote: [],
             confirmedListings: [],
+            selectedAngebote: [],
+            selectedStunden: [],
         };
 
         function updatePaymentInput() {
@@ -329,15 +339,29 @@
             document.getElementById('abo-count').textContent = `Deine Abostunden (${mieter.abostunden.length})`;
             const abosList = document.getElementById('abos-list');
             abosList.innerHTML = mieter.abostunden.length === 0 ? '<p style="color: #999;">Alle freigegeben!</p>' :
-                mieter.abostunden.map(s => `
-                    <div class="card-item">
-                        <div class="card-left">
-                            <h3>${s.platz}</h3>
-                            <p>${s.datum} • ${s.uhrzeit}</p>
+                mieter.abostunden.map(s => {
+                    const isSelected = appState.selectedStunden && appState.selectedStunden.find(x => x.id === s.id);
+                    return `
+                        <div class="card-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer; display: flex; gap: 12px;" onclick="toggleStundenSelection(${s.id})">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;" onclick="event.stopPropagation(); toggleStundenSelection(${s.id})">
+                            <div class="card-left" style="flex: 1;">
+                                <h3>${s.platz}</h3>
+                                <p>${s.datum} • ${s.uhrzeit}</p>
+                                <p style="font-size: 12px; color: #999; margin-top: 4px;">Original-Miete: €${s.originalMiete}</p>
+                            </div>
                         </div>
-                        <button class="btn btn-black btn-small" onclick="openFreigabeModal(${s.id})">+ Freigeben</button>
+                    `;
+                }).join('');
+            
+            // Zeige Button wenn Stunden ausgewählt sind
+            if (appState.selectedStunden && appState.selectedStunden.length > 0) {
+                abosList.innerHTML += `
+                    <div class="modal-box yellow" style="margin-top: 16px;">
+                        <div class="price-row"><span>Ausgewählte Stunden:</span><span style="font-weight: bold;">${appState.selectedStunden.length}</span></div>
+                        <button class="btn btn-black" style="width: 100%; margin-top: 12px; padding: 12px; color: #facc15; border: 2px solid #facc15;" onclick="openMultiFreigabeModal()">📤 ${appState.selectedStunden.length} Stunde(n) freigeben</button>
                     </div>
-                `).join('');
+                `;
+            }
             
             // Weitervermiete Stunden
             const weitervermiet = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
@@ -368,10 +392,11 @@
                 '<p style="color: #999;">Keine Plätze verfügbar. Als Abonnent eine Stunde freigeben!</p>' :
                 appState.zweitmarktAngebote.map(a => {
                     const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-                    const rabatt = ((a.originalMiete - a.verkaufspreis) / a.originalMiete * 100).toFixed(0);
+                    const isSelected = appState.selectedAngebote && appState.selectedAngebote.find(s => s.id === a.id);
                     return `
-                        <div class="card-item">
-                            <div class="card-left">
+                        <div class="card-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer; display: flex; gap: 12px;" onclick="toggleStundeSelection(${a.id})">
+                            <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;" onclick="event.stopPropagation(); toggleStundeSelection(${a.id})">
+                            <div class="card-left" style="flex: 1;">
                                 <h3>${a.platz}</h3>
                                 <p>${a.datum} • ${a.uhrzeit}</p>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; font-size: 14px;">
@@ -388,11 +413,112 @@
                                     <div class="price-row"><span>+ Verein (10%):</span><span>€${(a.verkaufspreis * 0.1).toFixed(2)}</span></div>
                                     <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 4px; margin-top: 4px;"><span style="font-weight: bold;">Total:</span><span style="font-weight: bold;">€${spielerZahlt.toFixed(2)}</span></div>
                                 </div>
+                                <p style="font-size: 11px; color: #999; margin-top: 8px;">Anbieter: ${a.mieterName}</p>
                             </div>
-                            <button class="btn btn-black btn-small" onclick="openBuchungModal(${a.id})">Buchen</button>
                         </div>
                     `;
                 }).join('');
+            
+            // Zeige Button wenn Stunden ausgewählt sind
+            if (appState.selectedAngebote && appState.selectedAngebote.length > 0) {
+                const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
+                const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
+                
+                list.innerHTML += `
+                    <div class="modal-box yellow" style="margin-top: 16px;">
+                        <div class="price-row"><span>Ausgewählte Stunden:</span><span style="font-weight: bold;">${appState.selectedAngebote.length}</span></div>
+                        <div class="price-row"><span>Unterschiedliche Anbieter:</span><span style="font-weight: bold;">${anbieterSet.size}</span></div>
+                        ${anbieterSet.size > 1 ? '<div class="price-row" style="font-size: 12px; color: #ca8a04;">⚠️ Mehrere Zahlungen nötig</div>' : ''}
+                        <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px;"><span style="font-weight: bold; font-size: 16px;">Gesamtbetrag:</span><span style="font-weight: bold; font-size: 18px; color: #ca8a04;">€${totalBetrag.toFixed(2)}</span></div>
+                        <button class="btn btn-yellow" style="width: 100%; margin-top: 12px; padding: 12px;" onclick="openMultiBookingModal()">💳 ${appState.selectedAngebote.length} Stunde(n) buchen</button>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleStundenSelection(stundenId) {
+            if (!appState.selectedStunden) appState.selectedStunden = [];
+            
+            const index = appState.selectedStunden.findIndex(s => s.id === stundenId);
+            if (index > -1) {
+                appState.selectedStunden.splice(index, 1);
+            } else {
+                const stunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
+                if (stunde) appState.selectedStunden.push(stunde);
+            }
+            renderMieterDashboard();
+        }
+
+        function openMultiFreigabeModal() {
+            if (!appState.selectedStunden || appState.selectedStunden.length === 0) {
+                alert('Bitte wähle mindestens eine Stunde aus!');
+                return;
+            }
+            
+            document.getElementById('freigabe-title').textContent = `${appState.selectedStunden.length} Stunde(n) freigeben`;
+            
+            const stunden = appState.selectedStunden;
+            const gesamt = stunden.reduce((sum, s) => sum + s.originalMiete, 0);
+            
+            document.getElementById('freigabe-info').innerHTML = `
+                <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Ausgewählte Stunden:</p>
+                ${stunden.map(s => `
+                    <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
+                        <p style="font-weight: bold;">${s.platz}</p>
+                        <p style="color: #666;">${s.datum} • ${s.uhrzeit}</p>
+                        <p style="color: #999; margin-top: 4px;">Original: €${s.originalMiete}</p>
+                    </div>
+                `).join('')}
+                <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 12px;">
+                    <p style="font-weight: bold;">Gesamt Original-Miete: €${gesamt}</p>
+                </div>
+            `;
+            
+            const options = document.getElementById('freigabe-options');
+            options.innerHTML = [50, 60].map(percent => {
+                const verkaufspreis = (gesamt * percent) / 100;
+                const vereinGebuehr = verkaufspreis * 0.1;
+                return `
+                    <button class="price-option" onclick="handleMultiFreigeben(${percent}, ${verkaufspreis})">
+                        <h4>${percent}% = €${verkaufspreis.toFixed(2)}</h4>
+                        <div class="price-breakdown">
+                            <div class="price-row"><span>Spieler zahlen insgesamt:</span><span style="font-weight: bold; color: #16a34a;">€${(verkaufspreis + vereinGebuehr).toFixed(2)}</span></div>
+                            <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 4px; margin-top: 4px;"><span>Du erhältst:</span><span style="font-weight: bold; color: #ca8a04;">€${verkaufspreis.toFixed(2)}</span></div>
+                            <p style="font-size: 11px; color: #666; margin-top: 6px;">(Verein erhält: €${vereinGebuehr.toFixed(2)})</p>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            
+            document.getElementById('freigabe-modal').classList.remove('hidden');
+        }
+
+        function handleMultiFreigeben(percent, gesamtverkaufspreis) {
+            if (!appState.selectedStunden || appState.selectedStunden.length === 0) return;
+            
+            const stunden = appState.selectedStunden;
+            const durchschnittspreis = gesamtverkaufspreis / stunden.length;
+            
+            stunden.forEach(stunde => {
+                appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stunde.id);
+                
+                appState.zweitmarktAngebote.push({
+                    id: Math.random(),
+                    platz: stunde.platz,
+                    datum: stunde.datum,
+                    uhrzeit: stunde.uhrzeit,
+                    originalMiete: stunde.originalMiete,
+                    verkaufspreis: durchschnittspreis,
+                    mieterId: appState.currentEmail,
+                    mieterName: appState.currentUser.name,
+                    mieterZahlungsarten: appState.currentUser.zahlungsarten,
+                });
+            });
+            
+            appState.selectedStunden = [];
+            closeFreigabeModal();
+            renderMieterDashboard();
+            alert(`✅ ${stunden.length} Stunde(n) freigegeben! (${percent}% Rabatt)`);
         }
 
         function openFreigabeModal(stundenId) {
@@ -445,6 +571,59 @@
             document.getElementById('freigabe-modal').classList.add('hidden');
         }
 
+        function toggleStundeSelection(angebotId) {
+            if (!appState.selectedAngebote) appState.selectedAngebote = [];
+            
+            const index = appState.selectedAngebote.findIndex(a => a.id === angebotId);
+            if (index > -1) {
+                appState.selectedAngebote.splice(index, 1);
+            } else {
+                const angebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
+                if (angebot) appState.selectedAngebote.push(angebot);
+            }
+            renderSpielerDashboard();
+        }
+
+        function openMultiBookingModal() {
+            if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) {
+                alert('Bitte wähle mindestens eine Stunde aus!');
+                return;
+            }
+            
+            const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
+            const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
+            
+            let infoText = `${appState.selectedAngebote.length} Stunde(n) werden gebucht`;
+            if (anbieterSet.size > 1) {
+                infoText += `\n⚠️ Achtung: ${anbieterSet.size} verschiedene Anbieter\n→ Es werden mehrere Zahlungen durchgeführt`;
+            }
+            
+            document.getElementById('buchung-info').innerHTML = `
+                <p style="font-weight: bold; margin-bottom: 12px;">Übersicht:</p>
+                ${appState.selectedAngebote.map(a => `
+                    <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
+                        <p style="font-weight: bold;">${a.platz}</p>
+                        <p style="color: #666;">${a.datum} • ${a.uhrzeit}</p>
+                        <p style="color: #999;">Anbieter: ${a.mieterName}</p>
+                        <p style="font-weight: bold; color: #ca8a04;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
+                    </div>
+                `).join('')}
+                ${anbieterSet.size > 1 ? `
+                    <div style="background: #fef3c7; border: 1px solid #facc15; padding: 8px; border-radius: 4px; margin-top: 12px; font-size: 12px;">
+                        <p style="font-weight: bold; color: #ca8a04;">⚠️ Mehrere Zahlungen</p>
+                        <p style="color: #666; margin-top: 4px;">Stunden von verschiedenen Anbietern werden separat abgerechnet.</p>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('buchung-price').innerHTML = `
+                <p style="font-size: 14px; color: #666;">Gesamtbetrag:</p>
+                <p style="font-size: 32px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
+            `;
+            
+            document.getElementById('buchung-modal').classList.remove('hidden');
+        }
+
         function openBuchungModal(angebotId) {
             appState.selectedAngebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
             const a = appState.selectedAngebot;
@@ -475,6 +654,130 @@
 
         function closeBuchungModal() {
             document.getElementById('buchung-modal').classList.add('hidden');
+        }
+
+        function openPaymentModal() {
+            const a = appState.selectedAngebot;
+            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
+            
+            document.getElementById('payment-step-title').textContent = 'Zahlungsmethode wählen';
+            document.getElementById('payment-content').innerHTML = `
+                <div class="modal-box yellow" style="margin-bottom: 16px;">
+                    <p style="font-size: 14px; color: #666; margin-bottom: 4px;">Zahlbetrag:</p>
+                    <p style="font-size: 28px; font-weight: bold; color: #ca8a04;">€${spielerZahlt.toFixed(2)}</p>
+                </div>
+                
+                <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px;">Wähle deine Zahlungsart:</p>
+                
+                <button class="price-option" onclick="processPayment('paypal', ${spielerZahlt})">
+                    <h4>🅿️ PayPal</h4>
+                    <p style="font-size: 12px; color: #666; margin: 8px 0;">Sichere Online-Zahlung</p>
+                </button>
+                
+                <button class="price-option" onclick="processPayment('iban', ${spielerZahlt})">
+                    <h4>🏦 Bankverbindung (IBAN)</h4>
+                    <p style="font-size: 12px; color: #666; margin: 8px 0;">Direkte Banküberweisung</p>
+                </button>
+                
+                <button class="btn btn-gray" style="width: 100%; margin-top: 12px;" onclick="closePaymentModal()">Abbrechen</button>
+            `;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function processPayment(method, betrag) {
+            const methodName = method === 'paypal' ? 'PayPal' : 'Banküberweisung';
+            
+            document.getElementById('payment-step-title').textContent = 'Zahlung wird verarbeitet...';
+            document.getElementById('payment-content').innerHTML = `
+                <div class="modal-box" style="text-align: center; padding: 32px 16px;">
+                    <p style="font-size: 48px; margin-bottom: 16px;">⏳</p>
+                    <p style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">Zahlung wird verarbeitet...</p>
+                    <p style="font-size: 14px; color: #666;">Zahlungsmethode: ${methodName}</p>
+                    <p style="font-size: 14px; color: #666;">Betrag: €${betrag.toFixed(2)}</p>
+                    <div style="margin-top: 24px; padding: 12px; background: #f3f4f6; border-radius: 6px; border-left: 4px solid #facc15;">
+                        <p style="font-size: 12px; color: #666;">Bitte warten...</p>
+                        <div style="margin-top: 12px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+                            <div style="height: 100%; background: #facc15; width: 0%; animation: progress 3s ease-in-out forwards;"></div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes progress {
+                        0% { width: 0%; }
+                        100% { width: 100%; }
+                    }
+                </style>
+            `;
+            
+            setTimeout(() => {
+                showPaymentSuccess(methodName, betrag);
+            }, 3500);
+        }
+
+        function showPaymentSuccess(method, betrag) {
+            const a = appState.selectedAngebot;
+            const vereinGebuehr = (a.verkaufspreis * 0.1).toFixed(2);
+            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
+            
+            document.getElementById('payment-step-title').textContent = '✅ Zahlung erfolgreich!';
+            document.getElementById('payment-content').innerHTML = `
+                <div class="modal-box yellow" style="text-align: center; padding: 24px;">
+                    <p style="font-size: 48px; margin-bottom: 16px;">✅</p>
+                    <p style="font-size: 18px; font-weight: bold; color: #ca8a04; margin-bottom: 8px;">Zahlung erhalten!</p>
+                    <p style="font-size: 14px; color: #666;">Vielen Dank für deine Buchung</p>
+                </div>
+                
+                <div class="modal-box" style="margin-bottom: 16px;">
+                    <p style="font-weight: bold; margin-bottom: 12px;">Zahlungsdetails:</p>
+                    <div class="price-row"><span>Platz:</span><span>${a.platz}</span></div>
+                    <div class="price-row"><span>Datum:</span><span>${a.datum}</span></div>
+                    <div class="price-row"><span>Zeit:</span><span>${a.uhrzeit}</span></div>
+                    <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px;"><span>Platz-Preis:</span><span>€${a.verkaufspreis.toFixed(2)}</span></div>
+                    <div class="price-row"><span>Verein-Gebühr (10%):</span><span>€${vereinGebuehr}</span></div>
+                    <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px; font-weight: bold;"><span>Gesamtbetrag:</span><span style="color: #ca8a04;">€${spielerZahlt.toFixed(2)}</span></div>
+                </div>
+                
+                <div class="modal-box" style="background: #f3f4f6; margin-bottom: 16px;">
+                    <p style="font-weight: bold; margin-bottom: 8px;">Zahlungsart:</p>
+                    <p>${method}</p>
+                </div>
+                
+                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="confirmPaymentAndBook()">✓ Buchung abschließen</button>
+            `;
+        }
+
+        function confirmPaymentAndBook() {
+            closeBuchungModal();
+            closePaymentModal();
+            
+            // Single oder Multi-Buchung
+            const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
+                ? appState.selectedAngebote 
+                : [appState.selectedAngebot];
+            
+            angebote.forEach(a => {
+                const newBuchung = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    angebot: a,
+                    spielerName: appState.currentUser.name,
+                    spielerEmail: appState.spielerEmail || '(keine Email)',
+                };
+                
+                appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(x => x.id !== a.id);
+                appState.confirmedListings.push(newBuchung);
+            });
+            
+            appState.selectedAngebote = [];
+            appState.selectedAngebot = null;
+            
+            const count = angebote.length;
+            document.getElementById('success-msg').innerHTML = `<div class="success">✅ ${count} Stunde(n) gebucht! Zahlung(en) erhalten!</div>`;
+            setTimeout(() => { document.getElementById('success-msg').innerHTML = ''; }, 5000);
+            renderSpielerDashboard();
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
         }
 
         function logout() {
