@@ -3,275 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Z88 Zweitmarkt</title>
+    <title>Z88 Zweitmarkt - Tennisplätze flexibel buchen</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { height: 100%; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; height: 100%; }
-        button { cursor: pointer; border: none; font-family: inherit; font-size: 16px; }
-        input, select { font-family: inherit; font-size: 16px; }
+        html, body { width: 100%; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif; background: #fff; }
+        input, select, button { font-family: inherit; }
         
-        .hidden { display: none !important; }
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; z-index: 1; }
+        .screen.active { display: flex; }
+        .screen.login-style { background: linear-gradient(135deg, #000 0%, #1f2937 100%); }
         
-        .login-screen { min-height: 100vh; background: black; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; }
-        .card { background: white; border-radius: 12px; padding: 24px; width: 100%; max-width: 450px; border: 4px solid #facc15; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; }
-        .card h1 { font-size: 42px; font-weight: 900; color: black; text-align: center; margin-bottom: 4px; }
-        .card .subtitle { font-size: 20px; font-weight: bold; color: #ca8a04; text-align: center; }
-        .card .desc { font-size: 13px; color: #666; text-align: center; margin-top: 12px; }
+        /* LOGIN SCREENS */
+        .login-screen { align-items: center; justify-content: center; padding: 16px; }
+        .login-card { background: white; border-radius: 16px; padding: 32px 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .login-card h1 { font-size: 48px; font-weight: 800; color: #000; text-align: center; margin-bottom: 8px; letter-spacing: -1px; }
+        .login-card .tagline { font-size: 16px; font-weight: 600; color: #ca8a04; text-align: center; }
+        .login-card .desc { font-size: 13px; color: #666; text-align: center; margin-top: 8px; line-height: 1.5; }
         
-        .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-        .btn { padding: 10px 14px; font-weight: bold; border-radius: 8px; transition: all 0.2s; font-size: 15px; }
-        .btn-black { background: black; color: #facc15; border: 2px solid #facc15; }
-        .btn-black:hover { background: #1f2937; }
-        .btn-yellow { background: #facc15; color: black; border: none; }
-        .btn-yellow:hover { background: #eab308; }
-        .btn-gray { background: #e5e7eb; color: black; border: none; }
-        .btn-gray:hover { background: #d1d5db; }
-        .btn-small { padding: 6px 12px; font-size: 14px; }
+        .login-form { margin-top: 24px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 15px; transition: border-color 0.2s; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #ca8a04; }
         
-        .dashboard { min-height: 100vh; background: #f3f4f6; }
-        .header { background: black; color: white; padding: 16px; border-bottom: 4px solid #facc15; position: sticky; top: 0; z-index: 40; }
-        .header-wrap { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 24px; font-weight: 900; }
-        .header .user { font-size: 14px; color: #d1d5db; }
+        .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .btn { padding: 11px 16px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; transition: all 0.2s; text-align: center; }
+        .btn-primary { background: #000; color: #facc15; border: 2px solid #facc15; }
+        .btn-primary:hover { background: #1f2937; }
+        .btn-secondary { background: #facc15; color: #000; }
+        .btn-secondary:hover { background: #eab308; }
+        .btn-outline { background: transparent; color: white; border: 2px solid white; }
+        .btn-outline:hover { background: rgba(255,255,255,0.1); }
+        .btn-small { padding: 8px 12px; font-size: 13px; }
         
-        .content { max-width: 1400px; margin: 0 auto; padding: 16px; }
-        .section { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
-        .section h2 { font-size: 20px; font-weight: bold; color: #111; margin-bottom: 16px; }
+        /* DASHBOARD */
+        .dashboard { background: #f8f9fa; }
+        .dashboard-header { background: #000; color: white; padding: 16px; border-bottom: 3px solid #facc15; flex-shrink: 0; }
+        .dashboard-header-content { max-width: 1200px; margin: 0 auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
+        .dashboard-header h1 { font-size: 24px; font-weight: 800; }
+        .dashboard-header .user-info { font-size: 12px; color: #d1d5db; }
+        .logout-btn { background: transparent; color: #facc15; border: none; cursor: pointer; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        .logout-btn:hover { background: rgba(250, 204, 21, 0.1); }
         
-        .info-box { background: #fef3c7; border: 2px solid #facc15; padding: 12px; border-radius: 6px; font-size: 13px; margin-bottom: 16px; }
-        .info-box p { margin: 4px 0; }
-        .info-box .label { font-weight: bold; }
+        .dashboard-content { overflow-y: auto; flex: 1; }
+        .dashboard-main { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
         
-        .card-item { background: white; border-radius: 8px; padding: 16px; border-left: 4px solid #facc15; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; }
-        .card-item.faded { background: #f3f4f6; border-left-color: #9ca3af; opacity: 0.75; }
-        .card-left h3 { font-weight: bold; color: #111; margin-bottom: 4px; }
-        .card-left p { font-size: 14px; color: #666; margin: 2px 0; }
-        .card-left .price-info { background: white; padding: 8px; border-radius: 4px; font-size: 12px; margin-top: 8px; }
+        .section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0; }
+        .section h2 { font-size: 18px; font-weight: 700; color: #111; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-icon { font-size: 20px; }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 50; overflow-y: auto; }
-        .modal { background: white; border-radius: 8px; padding: 24px; max-width: 420px; width: 100%; border: 2px solid #facc15; margin: auto; }
-        .modal h3 { font-size: 18px; font-weight: bold; margin-bottom: 16px; }
-        .modal-box { background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-        .modal-box.yellow { background: #fef3c7; border: 2px solid #facc15; }
+        .info-banner { background: #fef3c7; border-left: 4px solid #ca8a04; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+        .info-banner p { margin: 4px 0; }
         
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: bold; color: #374151; margin-bottom: 4px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 15px; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #facc15; }
+        /* CALENDAR */
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .calendar-nav button { padding: 8px 14px; background: #000; color: #facc15; border: 2px solid #facc15; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12px; }
+        .calendar-nav .month-label { font-weight: 600; color: #111; flex: 1; text-align: center; font-size: 15px; }
         
-        .price-row { display: flex; justify-content: space-between; margin: 4px 0; padding: 4px 0; }
-        .price-option { padding: 16px; border: 2px solid #d1d5db; border-radius: 6px; margin-bottom: 12px; background: white; text-align: left; cursor: pointer; transition: all 0.2s; }
+        .hour-card { background: #f8f9fa; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+        .hour-card:hover { border-color: #facc15; background: #fffaf0; }
+        .hour-card.selected { background: #fef3c7; border-color: #ca8a04; }
+        .hour-card input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; cursor: pointer; }
+        .hour-card-content { display: flex; justify-content: space-between; align-items: center; flex: 1; }
+        .hour-info h3 { font-size: 14px; font-weight: 600; color: #111; }
+        .hour-info p { font-size: 12px; color: #666; margin-top: 2px; }
+        .hour-price { font-size: 14px; font-weight: 700; color: #ca8a04; }
+        
+        .action-btn { padding: 7px 12px; background: #000; color: #facc15; border: 1.5px solid #facc15; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .action-btn:hover { background: #1f2937; }
+        
+        /* OFFER CARD */
+        .offer-card { background: white; border: 1.5px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start; cursor: pointer; transition: all 0.2s; }
+        .offer-card:hover { border-color: #facc15; }
+        .offer-card.selected { background: #fef3c7; border-color: #ca8a04; }
+        .offer-checkbox { width: 18px; height: 18px; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+        .offer-info { flex: 1; }
+        .offer-court { font-size: 14px; font-weight: 600; color: #111; }
+        .offer-time { font-size: 13px; color: #666; margin-top: 2px; }
+        .offer-price { text-align: right; flex-shrink: 0; }
+        .offer-original { font-size: 12px; color: #999; text-decoration: line-through; }
+        .offer-current { font-size: 18px; font-weight: 700; color: #ca8a04; margin-top: 2px; }
+        .offer-seller { font-size: 11px; color: #999; margin-top: 6px; }
+        
+        /* BOOKED SECTION */
+        .booked-card { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px; border-radius: 8px; margin-bottom: 10px; }
+        .booked-card .court { font-weight: 600; color: #111; font-size: 14px; }
+        .booked-card .details { font-size: 12px; color: #666; margin-top: 4px; }
+        .booked-card .seller { font-size: 12px; color: #666; margin-top: 8px; font-weight: 500; }
+        .booked-card .price { font-size: 16px; font-weight: 700; color: #16a34a; margin-top: 8px; }
+        
+        /* RELEASED SECTION */
+        .released-card { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px; border-radius: 8px; margin-bottom: 10px; }
+        .released-card .court { font-weight: 600; color: #111; font-size: 14px; }
+        .released-card .details { font-size: 12px; color: #666; margin-top: 4px; }
+        .released-card .earn { font-size: 12px; color: #16a34a; margin-top: 8px; font-weight: 600; }
+        .released-card .status { font-size: 11px; color: #999; margin-top: 4px; }
+        
+        /* SOLD SECTION */
+        .sold-card { background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 14px; border-radius: 8px; margin-bottom: 10px; opacity: 0.85; }
+        .sold-card .court { font-weight: 600; color: #111; font-size: 14px; }
+        .sold-card .booked-by { font-size: 12px; color: #666; margin-top: 6px; font-weight: 500; }
+        .sold-card .buyer { font-size: 12px; color: #666; }
+        .sold-card .earn { font-size: 13px; font-weight: 600; color: #ca8a04; margin-top: 6px; }
+        
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100; overflow-y: auto; }
+        .modal { background: white; border-radius: 12px; padding: 28px; max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+        .modal-info { background: #f8f9fa; padding: 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+        .modal-price { background: #fef3c7; border: 2px solid #facc15; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center; }
+        .modal-price .label { font-size: 12px; color: #666; }
+        .modal-price .amount { font-size: 32px; font-weight: 800; color: #ca8a04; margin-top: 4px; }
+        .price-option { border: 2px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; text-align: left; }
         .price-option:hover { border-color: #facc15; background: #fef3c7; }
-        .price-option h4 { font-weight: bold; margin-bottom: 8px; }
-        .price-breakdown { background: #f3f4f6; padding: 8px; border-radius: 4px; font-size: 12px; }
+        .price-option h4 { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+        .price-option .breakdown { font-size: 12px; color: #666; }
+        .price-option .breakdown p { margin: 3px 0; }
         
-        .success { background: #fef3c7; border: 4px solid #facc15; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        /* SUCCESS */
+        .success-banner { background: #fef3c7; border: 2px solid #facc15; border-radius: 8px; padding: 14px; text-align: center; margin-bottom: 16px; font-weight: 600; color: #111; }
         
-        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
-        .calendar-nav button { padding: 8px 12px; background: black; color: #facc15; border: 2px solid #facc15; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .calendar-nav .week-display { text-align: center; font-weight: bold; }
-        .calendar-week { display: grid; gap: 12px; }
-        .calendar-item { background: white; border-radius: 8px; padding: 12px; border-left: 4px solid #facc15; display: flex; justify-content: space-between; align-items: center; }
-        
-        .email-template { background: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 24px; font-size: 14px; line-height: 1.6; }
-        .email-header { background: black; color: #facc15; padding: 16px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; font-size: 18px; }
-        .email-body { padding: 24px; }
-        .email-body p { margin-bottom: 12px; }
-        .email-booking { background: #fef3c7; padding: 16px; border-radius: 6px; margin: 16px 0; }
-        .email-footer { background: #f3f4f6; padding: 16px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .login-card { padding: 24px 18px; }
+            .section { padding: 16px; }
+            .offer-card { flex-wrap: wrap; }
+            .offer-info { flex: 1 1 100%; }
+            .offer-price { flex: 1 1 100%; text-align: left; margin-top: 8px; }
+        }
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
-    <div id="login" class="login-screen">
-        <div class="card">
+    <!-- INITIAL LOGIN -->
+    <div id="initial-login" class="screen login-style login-screen active">
+        <div class="login-card">
             <h1>Z88</h1>
-            <p class="subtitle">ZWEITMARKT</p>
-            <p class="desc">Hallenstunden flexibel freigeben & buchen</p>
-                <button class="btn btn-black" onclick="goToScreen('mieter-reg')">📅 Ich bin Abonnent</button>
-                <button class="btn btn-yellow" onclick="goToScreen('spieler-login')">🎾 Ich suche einen Platz</button>
+            <p class="tagline">ZWEITMARKT</p>
+            <p class="desc">Tennisplätze flexibel freigeben & buchen</p>
+            <div class="button-group" style="margin-top: 32px;">
+                <button class="btn btn-primary" onclick="goToScreen('mieter-login')">📅 Ich bin Abonnent</button>
+                <button class="btn btn-secondary" onclick="goToScreen('spieler-login')">🎾 Ich suche einen Platz</button>
             </div>
         </div>
     </div>
 
-    <!-- MIETER REGISTRIERUNG -->
-    <div id="mieter-reg" class="hidden login-screen">
-        <div class="card">
-            <h1 style="font-size: 32px; margin-bottom: 4px;">Abonnent</h1>
-            <p class="subtitle">Login</p>
-            <p class="desc">Deine Stunden verwalten</p>
-            
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="mieter-email" placeholder="max.mueller@example.de">
+    <!-- MIETER LOGIN -->
+    <div id="mieter-login" class="screen login-style login-screen">
+        <div class="login-card">
+            <h1 style="font-size: 36px;">Abonnent</h1>
+            <p class="tagline">Anmelden</p>
+            <p class="desc">Verwalte deine Stunden</p>
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="mieter-email" placeholder="max.mueller@example.de">
+                </div>
+                <div class="form-group">
+                    <label>Mitgliedsnummer</label>
+                    <input type="text" id="mieter-number" placeholder="2024001">
+                </div>
+                <div class="form-group">
+                    <label>Zahlungsart</label>
+                    <select id="zahlungsart-typ" onchange="updatePaymentInput()">
+                        <option value="paypal">PayPal</option>
+                        <option value="iban">Bankverbindung (IBAN)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="payment-label">PayPal Email</label>
+                    <input type="text" id="zahlungsart-wert" placeholder="name@paypal.com">
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label>Mitgliedsnummer</label>
-                <input type="text" id="mieter-number" placeholder="2024001">
-            </div>
-            
-            <div class="form-group">
-                <label>Zahlungsart</label>
-                <select id="zahlungsart-typ" onchange="updatePaymentInput()">
-                    <option value="paypal">PayPal</option>
-                    <option value="iban">Bankverbindung (IBAN)</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label id="payment-label">PayPal Email</label>
-                <input type="text" id="zahlungsart-wert" placeholder="name@paypal.com">
-            </div>
-            
             <div class="button-group">
-                <button class="btn btn-black" onclick="handleMieterLogin()">Login</button>
-                <button class="btn btn-yellow" onclick="fillDemoData()">🎾 Demo-Daten</button>
-                <button class="btn btn-gray" onclick="goToScreen('login')">Zurück</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MIETER DASHBOARD -->
-    <div id="mieter-dashboard" class="hidden dashboard">
-        <div class="header">
-            <div class="header-wrap">
-                <div>
-                    <h1>Mein Platzabo</h1>
-                    <p class="user" id="mieter-name-display">Max Müller</p>
-                </div>
-                <button class="btn btn-yellow" onclick="logout()">🚪 Logout</button>
-            </div>
-        </div>
-        <div class="content">
-            <div class="section">
-                <div class="info-box">
-                    <p class="label">💳 Zahlungsmethoden</p>
-                    <p id="payment-info-display"></p>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2>Deine Abostunden</h2>
-                <div class="calendar-nav">
-                    <button onclick="previousMonth()">← Vorheriger Monat</button>
-                    <div class="week-display" id="month-display">Oktober 2026</div>
-                    <button onclick="nextMonth()">Nächster Monat →</button>
-                </div>
-                <div id="calendar-weeks"></div>
+                <button class="btn btn-primary" onclick="handleMieterLogin()">Anmelden</button>
+                <button class="btn btn-secondary" onclick="fillDemoData()">Demo-Daten (Max)</button>
+                <button class="btn btn-outline" onclick="goToScreen('initial-login')">← Zurück</button>
             </div>
         </div>
     </div>
 
     <!-- SPIELER LOGIN -->
-    <div id="spieler-login" class="hidden login-screen">
-        <div class="card">
-            <h1 style="font-size: 32px; margin-bottom: 4px;">Platz</h1>
-            <p class="subtitle">Buchen</p>
-            <p class="desc">Freie Stunden finden</p>
-            <div class="form-group">
-                <label>Name</label>
-                <input type="text" id="spieler-name" placeholder="Dein Name">
-            </div>
-            <div class="form-group">
-                <label>Email (optional)</label>
-                <input type="email" id="spieler-email" placeholder="deine@email.de">
+    <div id="spieler-login" class="screen login-style login-screen">
+        <div class="login-card">
+            <h1 style="font-size: 36px;">Spieler</h1>
+            <p class="tagline">Anmelden</p>
+            <p class="desc">Freie Plätze finden</p>
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Dein Name</label>
+                    <input type="text" id="spieler-name" placeholder="Dirk">
+                </div>
+                <div class="form-group">
+                    <label>Email (optional)</label>
+                    <input type="email" id="spieler-email" placeholder="dirk@example.de">
+                </div>
             </div>
             <div class="button-group">
-                <button class="btn btn-yellow" onclick="handleSpielerLogin()">Zu den freien Plätzen</button>
-                <button class="btn btn-yellow" onclick="fillSpielerDemoData()" style="background: #facc15; color: black;">🎾 Demo-Daten (Dirk)</button>
-                <button class="btn btn-gray" onclick="goToScreen('login')">Zurück</button>
+                <button class="btn btn-primary" onclick="handleSpielerLogin()">Zu freien Plätzen</button>
+                <button class="btn btn-secondary" onclick="fillSpielerDemoData()">Demo-Daten (Dirk)</button>
+                <button class="btn btn-outline" onclick="goToScreen('initial-login')">← Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIETER DASHBOARD -->
+    <div id="mieter-dashboard" class="screen dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div>
+                    <h1>Mein Platzabo</h1>
+                    <div class="user-info" id="mieter-name-display">Max Müller</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">🚪 Abmelden</button>
+            </div>
+        </div>
+        <div class="dashboard-content">
+            <div class="dashboard-main">
+                <div class="section">
+                    <h2><span class="section-icon">💳</span> Zahlungsinformationen</h2>
+                    <div class="info-banner" id="payment-info-display"></div>
+                </div>
+
+                <div class="section">
+                    <h2><span class="section-icon">📅</span> Deine Abostunden</h2>
+                    <div class="calendar-nav">
+                        <button onclick="previousMonth()">← Vorheriger Monat</button>
+                        <div class="month-label" id="month-display">Oktober 2026</div>
+                        <button onclick="nextMonth()">Nächster Monat →</button>
+                    </div>
+                    <div id="calendar-weeks"></div>
+                </div>
+
+                <div class="section" id="released-section" style="display:none;">
+                    <h2><span class="section-icon">📤</span> Freigegebene Stunden</h2>
+                    <div id="released-list"></div>
+                </div>
+
+                <div class="section" id="sold-section" style="display:none;">
+                    <h2><span class="section-icon">✅</span> Verkaufte Stunden</h2>
+                    <div id="sold-list"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- SPIELER DASHBOARD -->
-    <div id="spieler-dashboard" class="hidden dashboard">
-        <div class="header">
-            <div class="header-wrap">
+    <div id="spieler-dashboard" class="screen dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
                 <div>
-                    <h1>Freie Plätze im Zweitmarkt</h1>
-                    <p class="user" id="spieler-name-display">Player</p>
+                    <h1>Freie Plätze</h1>
+                    <div class="user-info" id="spieler-name-display">Player</div>
                 </div>
-                <button class="btn btn-yellow" onclick="logout()">🚪 Logout</button>
+                <button class="logout-btn" onclick="logout()">🚪 Abmelden</button>
             </div>
         </div>
-        <div class="content">
-            <div class="section">
-                <h2 id="gebucht-count">Meine gebuchten Stunden (0)</h2>
-                <div id="gebucht-list"></div>
-            </div>
-            <div class="section">
-                <h2 id="plaetze-count">Verfügbare Plätze (0)</h2>
-                <div id="plaetze-list"></div>
+        <div class="dashboard-content">
+            <div class="dashboard-main">
+                <div id="success-msg"></div>
+
+                <div class="section" id="booked-section" style="display:none;">
+                    <h2><span class="section-icon">✅</span> Meine gebuchten Stunden</h2>
+                    <div id="booked-list"></div>
+                </div>
+
+                <div class="section">
+                    <h2><span class="section-icon">🎾</span> Verfügbare Plätze</h2>
+                    <div id="plaetze-list"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- FREIGABE MODAL -->
-    <div id="freigabe-modal" class="hidden modal-overlay" onclick="if(event.target === this) closeFreigabeModal()">
-        <div class="modal">
+    <!-- MODALS -->
+    <div id="freigabe-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeFreigabeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
             <h3 id="freigabe-title">Stunde freigeben</h3>
-            <div class="modal-box" id="freigabe-info"></div>
+            <div class="modal-info" id="freigabe-info"></div>
             <div id="freigabe-options"></div>
-            <button class="btn btn-gray" style="width: 100%; margin-top: 12px;" onclick="closeFreigabeModal()">Abbrechen</button>
+            <button class="btn btn-outline" style="width: 100%; margin-top: 16px; color: #000; border-color: #000;" onclick="closeFreigabeModal()">Abbrechen</button>
         </div>
     </div>
 
-    <!-- BUCHUNG MODAL -->
-    <div id="buchung-modal" class="hidden modal-overlay" onclick="if(event.target === this) closeBuchungModal()">
-        <div class="modal">
+    <div id="buchung-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeBuchungModal()">
+        <div class="modal" onclick="event.stopPropagation()">
             <h3>Buchung bestätigen</h3>
-            <div class="modal-box" id="buchung-info"></div>
-            <div class="modal-box yellow" id="buchung-price"></div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="openPaymentModal()">💳 Zahlung bestätigen</button>
-                <button class="btn btn-gray" style="width: 100%;" onclick="closeBuchungModal()">Abbrechen</button>
-            </div>
+            <div class="modal-info" id="buchung-info"></div>
+            <div class="modal-price" id="buchung-price"></div>
+            <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" onclick="openPaymentModal()">💳 Zur Zahlung</button>
+            <button class="btn btn-outline" style="width: 100%; color: #000; border-color: #000;" onclick="closeBuchungModal()">Abbrechen</button>
         </div>
     </div>
 
-    <!-- ZAHLUNGS-MODAL -->
-    <div id="payment-modal" class="hidden modal-overlay" onclick="if(event.target === this) closePaymentModal()">
-        <div class="modal">
-            <h3 id="payment-step-title">Zahlungsmethode wählen</h3>
+    <div id="payment-modal" class="modal-overlay hidden" onclick="if(event.target === this) closePaymentModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="payment-step-title">Zahlung</h3>
             <div id="payment-content"></div>
         </div>
     </div>
 
-    <!-- EMAIL-BESTÄTIGUNG MODAL -->
-    <div id="email-modal" class="hidden modal-overlay" onclick="closeEmailModal()">
-        <div class="modal" style="max-width: 600px;" onclick="event.stopPropagation()">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0;">✅ Buchung erfolgreich!</h3>
-                <button class="btn btn-gray" style="padding: 4px 8px; font-size: 20px;" onclick="closeEmailModal()">✕</button>
-            </div>
+    <div id="email-modal" class="modal-overlay hidden" onclick="closeEmailModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 style="text-align: center; margin-bottom: 24px;">✅ Buchung erfolgreich!</h3>
             <div id="email-content"></div>
-            <button class="btn btn-yellow" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="closeEmailModal()">Dashboard anzeigen</button>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="closeEmailModal()">Dashboard anzeigen</button>
         </div>
     </div>
 
+    <div class="hidden" id="helper"></div>
+
     <script>
-        // APP STATE
         const appState = {
-            currentScreen: 'login',
+            currentScreen: 'initial-login',
             currentUser: null,
             currentEmail: null,
             spielerEmail: '',
-            selectedStunde: null,
-            selectedAngebot: null,
-            selectedAngebote: [],
             selectedStunden: [],
-            currentWeekOffset: 0,
+            selectedAngebote: [],
             currentMonthOffset: 0,
             
             mieterDB: {
                 'max.mueller@example.de': {
                     name: 'Max Müller',
-                    email: 'max.mueller@example.de',
-                    mitgliedsnummer: '2024001',
-                    zahlungsarten: [{ id: 1, typ: 'paypal', wert: 'max.mueller@paypal.com' }],
+                    zahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
                     abostunden: generateAbostunden(),
                 },
             },
@@ -283,25 +337,12 @@
         function generateAbostunden() {
             const stunden = [];
             let id = 1;
-            const startDate = new Date(2026, 9, 7); // 7. Oktober 2026 (Mittwoch)
+            const startDate = new Date(2026, 9, 7);
             const endDate = new Date(2027, 2, 31);
-            
             for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
                 const dateStr = d.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                stunden.push({
-                    id: id++,
-                    platz: 'Platz 1',
-                    datum: dateStr,
-                    uhrzeit: '18:00-19:00',
-                    originalMiete: 28,
-                });
-                stunden.push({
-                    id: id++,
-                    platz: 'Platz 1',
-                    datum: dateStr,
-                    uhrzeit: '19:00-20:00',
-                    originalMiete: 28,
-                });
+                stunden.push({ id: id++, platz: 'Platz 1', datum: dateStr, uhrzeit: '18:00-19:00', originalMiete: 28 });
+                stunden.push({ id: id++, platz: 'Platz 1', datum: dateStr, uhrzeit: '19:00-20:00', originalMiete: 28 });
             }
             return stunden;
         }
@@ -310,7 +351,6 @@
             const typ = document.getElementById('zahlungsart-typ').value;
             const label = document.getElementById('payment-label');
             const input = document.getElementById('zahlungsart-wert');
-            
             if (typ === 'paypal') {
                 label.textContent = 'PayPal Email';
                 input.placeholder = 'name@paypal.com';
@@ -321,17 +361,9 @@
         }
 
         function goToScreen(screen) {
-            document.querySelectorAll('[id$="-login"], [id$="-reg"], [id$="-dashboard"]').forEach(el => el.classList.add('hidden'));
-            document.getElementById(screen)?.classList.remove('hidden');
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(screen)?.classList.add('active');
             appState.currentScreen = screen;
-            window.scrollTo(0, 0);
-            
-            // Overflow bei Login Screens verhindern
-            if (screen.includes('login') || screen.includes('reg')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'auto';
-            }
         }
 
         function fillDemoData() {
@@ -341,58 +373,14 @@
             document.getElementById('zahlungsart-wert').value = 'max.mueller@paypal.com';
             updatePaymentInput();
             
-            // Demo: Einige Stunden bereits vermietet
             if (appState.confirmedListings.length === 0) {
                 appState.confirmedListings = [
-                    {
-                        id: 'demo1',
-                        angebot: {
-                            id: Math.random(),
-                            platz: 'Platz 1',
-                            datum: '07.10.2026',
-                            uhrzeit: '18:00-19:00',
-                            originalMiete: 28,
-                            verkaufspreis: 14,
-                            mieterId: 'max.mueller@example.de',
-                            mieterName: 'Max Müller',
-                        },
-                        spielerName: 'Anna Schmidt',
-                        spielerEmail: 'anna.schmidt@example.de',
-                    },
-                    {
-                        id: 'demo2',
-                        angebot: {
-                            id: Math.random(),
-                            platz: 'Platz 1',
-                            datum: '14.10.2026',
-                            uhrzeit: '19:00-20:00',
-                            originalMiete: 28,
-                            verkaufspreis: 16.80,
-                            mieterId: 'max.mueller@example.de',
-                            mieterName: 'Max Müller',
-                        },
-                        spielerName: 'Thomas König',
-                        spielerEmail: 'thomas.koenig@example.de',
-                    },
-                    {
-                        id: 'demo3',
-                        angebot: {
-                            id: Math.random(),
-                            platz: 'Platz 1',
-                            datum: '21.10.2026',
-                            uhrzeit: '18:00-19:00',
-                            originalMiete: 28,
-                            verkaufspreis: 14,
-                            mieterId: 'max.mueller@example.de',
-                            mieterName: 'Max Müller',
-                        },
-                        spielerName: 'Julia Werner',
-                        spielerEmail: 'julia.werner@example.de',
-                    },
+                    { id: 'demo1', angebot: { id: Math.random(), platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Anna Schmidt', spielerEmail: 'anna.schmidt@example.de' },
+                    { id: 'demo2', angebot: { id: Math.random(), platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 16.80, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Thomas König', spielerEmail: 'thomas.koenig@example.de' },
+                    { id: 'demo3', angebot: { id: Math.random(), platz: 'Platz 1', datum: '21.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Julia Werner', spielerEmail: 'julia.werner@example.de' },
                 ];
             }
             
-            // Direkt einloggen
             appState.currentUser = { ...appState.mieterDB['max.mueller@example.de'] };
             appState.currentEmail = 'max.mueller@example.de';
             appState.currentMonthOffset = 0;
@@ -401,49 +389,14 @@
         }
 
         function fillSpielerDemoData() {
-            document.getElementById('spieler-name').value = 'Dirk';
-            document.getElementById('spieler-email').value = 'Dirk@z88.de';
-            
-            // Demo: Einige freie Stunden von Mieter verfügbar
             if (appState.zweitmarktAngebote.length === 0) {
                 appState.zweitmarktAngebote = [
-                    {
-                        id: Math.random(),
-                        platz: 'Platz 1',
-                        datum: '07.10.2026',
-                        uhrzeit: '19:00-20:00',
-                        originalMiete: 28,
-                        verkaufspreis: 14,
-                        mieterId: 'max.mueller@example.de',
-                        mieterName: 'Max Müller',
-                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
-                    },
-                    {
-                        id: Math.random(),
-                        platz: 'Platz 1',
-                        datum: '28.10.2026',
-                        uhrzeit: '18:00-19:00',
-                        originalMiete: 28,
-                        verkaufspreis: 16.80,
-                        mieterId: 'max.mueller@example.de',
-                        mieterName: 'Max Müller',
-                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
-                    },
-                    {
-                        id: Math.random(),
-                        platz: 'Platz 2',
-                        datum: '04.11.2026',
-                        uhrzeit: '19:00-20:00',
-                        originalMiete: 28,
-                        verkaufspreis: 14,
-                        mieterId: 'max.mueller@example.de',
-                        mieterName: 'Max Müller',
-                        mieterZahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
-                    },
+                    { id: Math.random(), platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
+                    { id: Math.random(), platz: 'Platz 1', datum: '28.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 16.80, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
+                    { id: Math.random(), platz: 'Platz 2', datum: '04.11.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
                 ];
             }
             
-            // Direkt einloggen
             appState.currentUser = { name: 'Dirk' };
             appState.spielerEmail = 'Dirk@z88.de';
             appState.currentEmail = `guest-dirk`;
@@ -454,7 +407,6 @@
         function handleMieterLogin() {
             const email = document.getElementById('mieter-email').value;
             const number = document.getElementById('mieter-number').value;
-            
             if (email === 'max.mueller@example.de' && number === '2024001') {
                 appState.currentUser = { ...appState.mieterDB[email] };
                 appState.currentEmail = email;
@@ -469,11 +421,7 @@
         function handleSpielerLogin() {
             const name = document.getElementById('spieler-name').value;
             const email = document.getElementById('spieler-email').value;
-            
-            if (!name) {
-                alert('Name erforderlich!');
-                return;
-            }
+            if (!name) { alert('Name erforderlich!'); return; }
             
             appState.currentUser = { name };
             appState.spielerEmail = email;
@@ -485,117 +433,73 @@
         function renderMieterDashboard() {
             const mieter = appState.currentUser;
             document.getElementById('mieter-name-display').textContent = mieter.name;
-            
-            // Zahlungsinformationen
-            const paymentInfo = mieter.zahlungsarten.map(z => {
-                const icon = z.typ === 'paypal' ? '🅿️ PayPal' : '🏦 IBAN';
-                return `${icon}: ${z.wert}`;
-            }).join('<br>');
+            const paymentInfo = mieter.zahlungsarten.map(z => `${z.typ === 'paypal' ? '🅿️ PayPal' : '🏦 IBAN'}: ${z.wert}`).join(' • ');
             document.getElementById('payment-info-display').innerHTML = paymentInfo;
             
-            // Kalender-Monate anzeigen
-            const startDate = new Date(2026, 9, 1); // Oktober 2026
+            const startDate = new Date(2026, 9, 1);
             const baseMonth = new Date(startDate);
             baseMonth.setMonth(baseMonth.getMonth() + appState.currentMonthOffset);
-            
             const monthName = baseMonth.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
             document.getElementById('month-display').textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
             
-            // 1. DEINE ABOSTUNDEN (noch nicht freigegeben)
             const monthStunden = mieter.abostunden.filter(s => {
                 const sDate = new Date(s.datum.split('.').reverse().join('-'));
                 return sDate.getMonth() === baseMonth.getMonth() && sDate.getFullYear() === baseMonth.getFullYear();
             });
             
             const calendarList = document.getElementById('calendar-weeks');
-            calendarList.innerHTML = monthStunden.length === 0 ? '<p style="color: #999;">Keine Stunden in diesem Monat</p>' :
+            calendarList.innerHTML = monthStunden.length === 0 ? '<p style="color: #999; font-size: 13px;">Keine Stunden in diesem Monat</p>' :
                 monthStunden.map(s => {
-                    const isSelected = appState.selectedStunden && appState.selectedStunden.find(x => x.id === s.id);
+                    const isSelected = appState.selectedStunden?.find(x => x.id === s.id);
                     return `
-                        <div class="calendar-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer;" onclick="toggleStundenSelection(${s.id})">
-                            <div style="flex: 1;">
-                                <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-right: 8px; width: 16px; height: 16px; cursor: pointer;" onclick="event.stopPropagation(); toggleStundenSelection(${s.id})">
-                                <span style="font-weight: bold;">${s.datum} • ${s.uhrzeit}</span>
-                                <p style="font-size: 12px; color: #999; margin-top: 4px;">€${s.originalMiete}</p>
+                        <div class="hour-card ${isSelected ? 'selected' : ''}" onclick="toggleStundenSelection(${s.id})">
+                            <div class="hour-card-content">
+                                <input type="checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleStundenSelection(${s.id})">
+                                <div class="hour-info">
+                                    <h3>${s.datum} • ${s.uhrzeit}</h3>
+                                    <p>Normal: €${s.originalMiete}</p>
+                                </div>
+                                <div style="flex-shrink: 0;">
+                                    <button class="action-btn" onclick="event.stopPropagation(); openFreigabeModal(${s.id})">Freigeben</button>
+                                </div>
                             </div>
-                            <button class="btn btn-black btn-small" onclick="event.stopPropagation(); openFreigabeModal(${s.id})" style="color: #facc15; border: 2px solid #facc15;">+ Freigeben</button>
                         </div>
                     `;
                 }).join('');
             
-            // 2. FREIGEGEBENE STUNDEN (noch zu verkaufen)
             const freigegebenStunden = appState.zweitmarktAngebote.filter(a => a.mieterId === appState.currentEmail);
-            
-            const freigebenSection = `
-                <div class="section">
-                    <h2>📤 Freigegebene Stunden (${freigegebenStunden.length})</h2>
-                    ${freigegebenStunden.length === 0 ? '<p style="color: #999;">Noch keine Stunden freigegeben.</p>' :
-                        freigegebenStunden.map(a => {
-                            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-                            return `
-                                <div class="card-item" style="background: #f0fdf4; border-left-color: #16a34a;">
-                                    <div class="card-left">
-                                        <h3>${a.platz}</h3>
-                                        <p>${a.datum} • ${a.uhrzeit}</p>
-                                        <div class="price-info">
-                                            <p style="font-size: 12px; color: #666;">Original: €${a.originalMiete}</p>
-                                            <p style="font-weight: bold; color: #16a34a;">Du erhältst: €${a.verkaufspreis.toFixed(2)}</p>
-                                            <p style="font-size: 11px; color: #999;">Spieler zahlt: €${spielerZahlt.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                </div>
-            `;
-            
-            // 3. VERKAUFTE STUNDEN (bereits gebucht)
-            const verkauftStunden = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
-            
-            const verkauftSection = `
-                <div class="section">
-                    <h2>✅ Verkaufte Stunden (${verkauftStunden.length})</h2>
-                    ${verkauftStunden.length === 0 ? '<p style="color: #999;">Noch keine verkauften Stunden.</p>' :
-                        verkauftStunden.map(b => {
-                            const spielerZahlt = b.angebot.verkaufspreis + (b.angebot.verkaufspreis * 0.1);
-                            return `
-                                <div class="card-item faded" style="background: #f3f4f6; border-left-color: #9ca3af;">
-                                    <div class="card-left">
-                                        <h3>${b.angebot.platz}</h3>
-                                        <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
-                                        <div class="price-info">
-                                            <p style="font-weight: bold;">Gebucht von:</p>
-                                            <p>${b.spielerName}</p>
-                                            <p style="color: #666; font-size: 12px;">${b.spielerEmail}</p>
-                                            <p style="font-weight: bold; color: #ca8a04; margin-top: 6px;">Du erhältst: €${b.angebot.verkaufspreis.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                </div>
-            `;
-            
-            // Sections nach dem Kalender einfügen
-            const abostundenSection = document.querySelector('[id="calendar-weeks"]').closest('.section');
-            const abostundenTitle = abostundenSection.querySelector('h2');
-            abostundenTitle.textContent = '📅 Deine Abostunden';
-            
-            // Finde das nächste Element nach abostundenSection
-            const container = abostundenSection.parentElement;
-            const abostundenIndex = Array.from(container.children).indexOf(abostundenSection);
-            
-            // Entferne alte sections falls vorhanden
-            while (container.children[abostundenIndex + 1] && 
-                   (container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Freigegebene') ||
-                    container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Verkaufte') ||
-                    container.children[abostundenIndex + 1].querySelector('h2')?.textContent.includes('Weitervermiete'))) {
-                container.children[abostundenIndex + 1].remove();
+            if (freigegebenStunden.length > 0) {
+                document.getElementById('released-section').style.display = 'block';
+                document.getElementById('released-list').innerHTML = freigegebenStunden.map(a => {
+                    const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
+                    return `
+                        <div class="released-card">
+                            <div class="court">${a.platz}</div>
+                            <div class="details">${a.datum} • ${a.uhrzeit}</div>
+                            <div class="earn">Du erhältst: €${a.verkaufspreis.toFixed(2)}</div>
+                            <div class="status">Spieler zahlt: €${spielerZahlt.toFixed(2)}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('released-section').style.display = 'none';
             }
             
-            // Füge neue Sections ein
-            abostundenSection.insertAdjacentHTML('afterend', verkauftSection);
-            abostundenSection.insertAdjacentHTML('afterend', freigebenSection);
+            const verkauftStunden = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
+            if (verkauftStunden.length > 0) {
+                document.getElementById('sold-section').style.display = 'block';
+                document.getElementById('sold-list').innerHTML = verkauftStunden.map(b => `
+                    <div class="sold-card">
+                        <div class="court">${b.angebot.platz}</div>
+                        <div class="details">${b.angebot.datum} • ${b.angebot.uhrzeit}</div>
+                        <div class="booked-by">Gebucht von:</div>
+                        <div class="buyer">${b.spielerName} • ${b.spielerEmail}</div>
+                        <div class="earn">Du erhältst: €${b.angebot.verkaufspreis.toFixed(2)}</div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('sold-section').style.display = 'none';
+            }
         }
 
         function previousMonth() {
@@ -604,15 +508,12 @@
         }
 
         function nextMonth() {
-            if (appState.currentMonthOffset < 5) { // Maximal bis März 2027
-                appState.currentMonthOffset++;
-                renderMieterDashboard();
-            }
+            if (appState.currentMonthOffset < 5) appState.currentMonthOffset++;
+            renderMieterDashboard();
         }
 
         function toggleStundenSelection(stundenId) {
             if (!appState.selectedStunden) appState.selectedStunden = [];
-            
             const index = appState.selectedStunden.findIndex(s => s.id === stundenId);
             if (index > -1) {
                 appState.selectedStunden.splice(index, 1);
@@ -623,63 +524,84 @@
             renderMieterDashboard();
         }
 
+        function openFreigabeModal(stundenId) {
+            const s = appState.currentUser.abostunden.find(s => s.id === stundenId);
+            document.getElementById('freigabe-title').textContent = `Stunde freigeben: ${s.platz}`;
+            document.getElementById('freigabe-info').innerHTML = `${s.datum} • ${s.uhrzeit}<br>Original-Preis: <strong>€${s.originalMiete}</strong>`;
+            document.getElementById('freigabe-options').innerHTML = [50, 60].map(percent => {
+                const verkaufspreis = (s.originalMiete * percent) / 100;
+                const vereinGebuehr = verkaufspreis * 0.1;
+                return `
+                    <button class="price-option" onclick="handleFreigeben(${stundenId}, ${verkaufspreis})">
+                        <h4>${percent}% Rabatt = €${verkaufspreis.toFixed(2)}</h4>
+                        <div class="breakdown">
+                            <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                            <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            document.getElementById('freigabe-modal').classList.remove('hidden');
+        }
+
+        function handleFreigeben(stundenId, verkaufspreis) {
+            const stunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
+            appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stundenId);
+            appState.zweitmarktAngebote.push({
+                id: Math.random(),
+                platz: stunde.platz,
+                datum: stunde.datum,
+                uhrzeit: stunde.uhrzeit,
+                originalMiete: stunde.originalMiete,
+                verkaufspreis: verkaufspreis,
+                mieterId: appState.currentEmail,
+                mieterName: appState.currentUser.name,
+            });
+            closeFreigabeModal();
+            renderMieterDashboard();
+        }
+
+        function closeFreigabeModal() {
+            document.getElementById('freigabe-modal').classList.add('hidden');
+        }
+
         function renderSpielerDashboard() {
             document.getElementById('spieler-name-display').textContent = appState.currentUser.name;
-            document.getElementById('plaetze-count').textContent = `Verfügbare Plätze (${appState.zweitmarktAngebote.length})`;
             
-            // Gebuchte Stunden anzeigen
             const mineBookings = appState.confirmedListings.filter(b => b.spielerEmail === appState.spielerEmail);
-            document.getElementById('gebucht-count').textContent = `Meine gebuchten Stunden (${mineBookings.length})`;
-            const gebuchList = document.getElementById('gebucht-list');
-            gebuchList.innerHTML = mineBookings.length === 0 ? '<p style="color: #999;">Noch keine Buchungen.</p>' :
-                mineBookings.map(b => {
+            if (mineBookings.length > 0) {
+                document.getElementById('booked-section').style.display = 'block';
+                document.getElementById('booked-list').innerHTML = mineBookings.map(b => {
                     const spielerZahlt = b.angebot.verkaufspreis + (b.angebot.verkaufspreis * 0.1);
                     return `
-                        <div class="card-item" style="background: #fef3c7; border-left-color: #ca8a04;">
-                            <div class="card-left">
-                                <h3>${b.angebot.platz}</h3>
-                                <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
-                                <div class="price-info">
-                                    <p style="font-weight: bold;">Vermieter:</p>
-                                    <p>${b.angebot.mieterName}</p>
-                                    <p style="color: #666; font-size: 12px;">${b.angebot.mieterName === 'Max Müller' ? 'max.mueller@example.de' : 'email@example.de'}</p>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <p style="font-size: 12px; color: #666;">Betrag:</p>
-                                <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${spielerZahlt.toFixed(2)}</p>
-                            </div>
+                        <div class="booked-card">
+                            <div class="court">${b.angebot.platz}</div>
+                            <div class="details">${b.angebot.datum} • ${b.angebot.uhrzeit}</div>
+                            <div class="seller">Von: ${b.angebot.mieterName}</div>
+                            <div class="price">€${spielerZahlt.toFixed(2)}</div>
                         </div>
                     `;
                 }).join('');
+            } else {
+                document.getElementById('booked-section').style.display = 'none';
+            }
             
             const list = document.getElementById('plaetze-list');
-            list.innerHTML = appState.zweitmarktAngebote.length === 0 ? 
-                '<p style="color: #999;">Keine Plätze verfügbar. Als Abonnent eine Stunde freigeben!</p>' :
+            list.innerHTML = appState.zweitmarktAngebote.length === 0 ? '<p style="color: #999; font-size: 13px;">Keine freien Plätze verfügbar</p>' :
                 appState.zweitmarktAngebote.map(a => {
                     const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-                    const isSelected = appState.selectedAngebote && appState.selectedAngebote.find(s => s.id === a.id);
+                    const isSelected = appState.selectedAngebote?.find(s => s.id === a.id);
                     return `
-                        <div class="card-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer; display: flex; gap: 12px;" onclick="toggleStundeSelection(${a.id})">
-                            <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;" onclick="event.stopPropagation(); toggleStundeSelection(${a.id})">
-                            <div class="card-left" style="flex: 1;">
-                                <h3>${a.platz}</h3>
-                                <p>${a.datum} • ${a.uhrzeit}</p>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; font-size: 14px;">
-                                    <div>
-                                        <p style="color: #666; font-size: 12px;">Normal</p>
-                                        <p style="text-decoration: line-through; color: #999;">€${a.originalMiete}</p>
-                                    </div>
-                                    <div>
-                                        <p style="color: #666; font-size: 12px;">Dein Preis</p>
-                                        <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${a.verkaufspreis}</p>
-                                    </div>
-                                </div>
-                                <div class="price-breakdown">
-                                    <div class="price-row"><span>+ Verein (10%):</span><span>€${(a.verkaufspreis * 0.1).toFixed(2)}</span></div>
-                                    <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 4px; margin-top: 4px;"><span style="font-weight: bold;">Total:</span><span style="font-weight: bold;">€${spielerZahlt.toFixed(2)}</span></div>
-                                </div>
-                                <p style="font-size: 11px; color: #999; margin-top: 8px;">Anbieter: ${a.mieterName}</p>
+                        <div class="offer-card ${isSelected ? 'selected' : ''}" onclick="toggleStundeSelection(${a.id})">
+                            <input type="checkbox" class="offer-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleStundeSelection(${a.id})">
+                            <div class="offer-info">
+                                <div class="offer-court">${a.platz}</div>
+                                <div class="offer-time">${a.datum} • ${a.uhrzeit}</div>
+                                <div class="offer-seller">Von: ${a.mieterName}</div>
+                            </div>
+                            <div class="offer-price">
+                                <div class="offer-original">€${a.originalMiete}</div>
+                                <div class="offer-current">€${spielerZahlt.toFixed(2)}</div>
                             </div>
                         </div>
                     `;
@@ -687,15 +609,11 @@
             
             if (appState.selectedAngebote && appState.selectedAngebote.length > 0) {
                 const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-                const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
-                
                 list.innerHTML += `
-                    <div class="modal-box yellow" style="margin-top: 16px;">
-                        <div class="price-row"><span>Ausgewählte Stunden:</span><span style="font-weight: bold;">${appState.selectedAngebote.length}</span></div>
-                        <div class="price-row"><span>Unterschiedliche Anbieter:</span><span style="font-weight: bold;">${anbieterSet.size}</span></div>
-                        ${anbieterSet.size > 1 ? '<div class="price-row" style="font-size: 12px; color: #ca8a04;">⚠️ Mehrere Zahlungen nötig</div>' : ''}
-                        <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px;"><span style="font-weight: bold; font-size: 16px;">Gesamtbetrag:</span><span style="font-weight: bold; font-size: 18px; color: #ca8a04;">€${totalBetrag.toFixed(2)}</span></div>
-                        <button class="btn btn-yellow" style="width: 100%; margin-top: 12px; padding: 12px;" onclick="openMultiBookingModal()">💳 ${appState.selectedAngebote.length} Stunde(n) buchen</button>
+                    <div class="info-banner" style="background: #fef3c7; border-left: 4px solid #ca8a04; margin-top: 12px; text-align: center;">
+                        <strong>${appState.selectedAngebote.length} Stunde(n) ausgewählt</strong><br>
+                        Gesamtbetrag: <strong style="color: #ca8a04;">€${totalBetrag.toFixed(2)}</strong><br>
+                        <button class="btn btn-secondary" style="margin-top: 10px; width: 100%;" onclick="openMultiBookingModal()">💳 Zur Buchung</button>
                     </div>
                 `;
             }
@@ -703,7 +621,6 @@
 
         function toggleStundeSelection(angebotId) {
             if (!appState.selectedAngebote) appState.selectedAngebote = [];
-            
             const index = appState.selectedAngebote.findIndex(a => a.id === angebotId);
             if (index > -1) {
                 appState.selectedAngebote.splice(index, 1);
@@ -715,103 +632,11 @@
         }
 
         function openMultiBookingModal() {
-            if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) {
-                alert('Bitte wähle mindestens eine Stunde aus!');
-                return;
-            }
-            
+            if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) return;
             const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-            const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
-            
-            document.getElementById('buchung-info').innerHTML = `
-                <p style="font-weight: bold; margin-bottom: 12px;">Übersicht:</p>
-                ${appState.selectedAngebote.map(a => `
-                    <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
-                        <p style="font-weight: bold;">${a.platz}</p>
-                        <p style="color: #666;">${a.datum} • ${a.uhrzeit}</p>
-                        <p style="color: #999;">Anbieter: ${a.mieterName}</p>
-                        <p style="font-weight: bold; color: #ca8a04;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
-                    </div>
-                `).join('')}
-                ${anbieterSet.size > 1 ? `
-                    <div style="background: #fef3c7; border: 1px solid #facc15; padding: 8px; border-radius: 4px; margin-top: 12px; font-size: 12px;">
-                        <p style="font-weight: bold; color: #ca8a04;">⚠️ Mehrere Zahlungen</p>
-                        <p style="color: #666; margin-top: 4px;">Stunden von verschiedenen Anbietern werden separat abgerechnet.</p>
-                    </div>
-                ` : ''}
-            `;
-            
-            document.getElementById('buchung-price').innerHTML = `
-                <p style="font-size: 14px; color: #666;">Gesamtbetrag:</p>
-                <p style="font-size: 32px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
-            `;
-            
+            document.getElementById('buchung-info').innerHTML = appState.selectedAngebote.map(a => `<strong>${a.platz}</strong> • ${a.datum} ${a.uhrzeit}`).join('<br>');
+            document.getElementById('buchung-price').innerHTML = `<div class="label">Gesamtbetrag</div><div class="amount">€${totalBetrag.toFixed(2)}</div>`;
             document.getElementById('buchung-modal').classList.remove('hidden');
-        }
-
-        function openFreigabeModal(stundenId) {
-            appState.selectedStunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
-            const s = appState.selectedStunde;
-            
-            document.getElementById('freigabe-title').textContent = `Stunde freigeben: ${s.platz}`;
-            document.getElementById('freigabe-info').innerHTML = `<p style="font-size: 14px; color: #666;">${s.datum} • ${s.uhrzeit}</p><p style="font-size: 32px; font-weight: bold; margin-top: 8px;">€${s.originalMiete}</p>`;
-            
-            const options = document.getElementById('freigabe-options');
-            options.innerHTML = [50, 60].map(percent => {
-                const verkaufspreis = (s.originalMiete * percent) / 100;
-                const vereinGebuehr = verkaufspreis * 0.1;
-                return `
-                    <button class="price-option" onclick="handleFreigeben(${stundenId}, ${verkaufspreis})">
-                        <h4>${percent}% = €${verkaufspreis.toFixed(2)}</h4>
-                        <div class="price-breakdown">
-                            <div class="price-row"><span>Spieler zahlt:</span><span style="font-weight: bold; color: #16a34a;">€${(verkaufspreis + vereinGebuehr).toFixed(2)}</span></div>
-                            <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 4px; margin-top: 4px;"><span>Du erhältst:</span><span style="font-weight: bold; color: #ca8a04;">€${verkaufspreis.toFixed(2)}</span></div>
-                        </div>
-                    </button>
-                `;
-            }).join('');
-            
-            document.getElementById('freigabe-modal').classList.remove('hidden');
-        }
-
-        function handleFreigeben(stundenId, verkaufspreis) {
-            const stunde = appState.selectedStunde;
-            appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stundenId);
-            
-            appState.zweitmarktAngebote.push({
-                id: Math.random(),
-                platz: stunde.platz,
-                datum: stunde.datum,
-                uhrzeit: stunde.uhrzeit,
-                originalMiete: stunde.originalMiete,
-                verkaufspreis: verkaufspreis,
-                mieterId: appState.currentEmail,
-                mieterName: appState.currentUser.name,
-                mieterZahlungsarten: appState.currentUser.zahlungsarten,
-            });
-            
-            closeFreigabeModal();
-            renderMieterDashboard();
-            alert('✅ Stunde freigegeben!');
-        }
-
-        function closeFreigabeModal() {
-            document.getElementById('freigabe-modal').classList.add('hidden');
-        }
-
-        function openBuchungModal(angebotId) {
-            appState.selectedAngebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
-            const a = appState.selectedAngebot;
-            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-            
-            document.getElementById('buchung-info').innerHTML = `<p style="font-size: 14px; color: #666;">${a.platz}</p><p style="font-weight: bold; margin-top: 4px;">${a.datum} • ${a.uhrzeit}</p>`;
-            document.getElementById('buchung-price').innerHTML = `<p style="font-size: 14px; color: #666;">Du zahlst:</p><p style="font-size: 32px; font-weight: bold; color: #ca8a04;">€${spielerZahlt.toFixed(2)}</p>`;
-            
-            document.getElementById('buchung-modal').classList.remove('hidden');
-        }
-
-        function closePaymentModal() {
-            document.getElementById('payment-modal').classList.add('hidden');
         }
 
         function closeBuchungModal() {
@@ -819,180 +644,76 @@
         }
 
         function openPaymentModal() {
-            const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
-                ? appState.selectedAngebote 
-                : [appState.selectedAngebot];
+            const angebote = appState.selectedAngebote || [];
             const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-            
-            document.getElementById('payment-step-title').textContent = 'Zahlungsmethode wählen';
+            document.getElementById('payment-step-title').textContent = 'Zahlungsart wählen';
             document.getElementById('payment-content').innerHTML = `
-                <div class="modal-box yellow" style="margin-bottom: 16px;">
-                    <p style="font-size: 14px; color: #666; margin-bottom: 4px;">Zahlbetrag:</p>
-                    <p style="font-size: 28px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
-                </div>
-                
-                <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px;">Wähle deine Zahlungsart:</p>
-                
-                <button class="price-option" onclick="processPayment('paypal', ${totalBetrag})">
-                    <h4>🅿️ PayPal</h4>
-                    <p style="font-size: 12px; color: #666; margin: 8px 0;">Sichere Online-Zahlung</p>
-                </button>
-                
-                <button class="price-option" onclick="processPayment('iban', ${totalBetrag})">
-                    <h4>🏦 Bankverbindung (IBAN)</h4>
-                    <p style="font-size: 12px; color: #666; margin: 8px 0;">Direkte Banküberweisung</p>
-                </button>
-                
-                <button class="price-option" style="background: #ffebee;" onclick="processPayment('failed', ${totalBetrag})">
-                    <h4>❌ Zahlung simulieren (Fehler)</h4>
-                    <p style="font-size: 12px; color: #d32f2f; margin: 8px 0;">Test: Zahlung wird abgelehnt</p>
-                </button>
-                
-                <button class="btn btn-gray" style="width: 100%; margin-top: 12px;" onclick="closePaymentModal()">Abbrechen</button>
+                <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${totalBetrag.toFixed(2)}</div></div>
+                <button class="price-option" onclick="processPayment('paypal', ${totalBetrag})"><h4>🅿️ PayPal</h4><div class="breakdown">Sichere Online-Zahlung</div></button>
+                <button class="price-option" onclick="processPayment('iban', ${totalBetrag})"><h4>🏦 Bankverbindung</h4><div class="breakdown">Direkte Banküberweisung</div></button>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 12px; color: #000; border-color: #000;" onclick="closePaymentModal()">Abbrechen</button>
             `;
             document.getElementById('payment-modal').classList.remove('hidden');
         }
 
         function processPayment(method, betrag) {
-            if (method === 'failed') {
-                document.getElementById('payment-step-title').textContent = '❌ Zahlung abgelehnt!';
-                document.getElementById('payment-content').innerHTML = `
-                    <div class="modal-box" style="background: #ffebee; border: 2px solid #d32f2f; text-align: center; padding: 32px 16px;">
-                        <p style="font-size: 48px; margin-bottom: 16px;">❌</p>
-                        <p style="font-size: 16px; font-weight: bold; color: #d32f2f; margin-bottom: 8px;">Zahlung nicht erfolgt</p>
-                        <p style="font-size: 14px; color: #d32f2f; margin-bottom: 16px;">Bitte versuche es mit einer anderen Zahlungsart</p>
-                        <button class="btn btn-gray" style="width: 100%;" onclick="goBackToPaymentMethodSelection()">Zurück</button>
-                    </div>
-                `;
-                return;
-            }
-
-            const methodName = method === 'paypal' ? 'PayPal' : 'Banküberweisung';
-            
-            document.getElementById('payment-step-title').textContent = 'Zahlung wird verarbeitet...';
+            document.getElementById('payment-step-title').textContent = '⏳ Wird verarbeitet...';
             document.getElementById('payment-content').innerHTML = `
-                <div class="modal-box" style="text-align: center; padding: 32px 16px;">
-                    <p style="font-size: 48px; margin-bottom: 16px;">⏳</p>
-                    <p style="font-size: 16px; font-weight: bold; margin-bottom: 8px;">Zahlung wird verarbeitet...</p>
-                    <p style="font-size: 14px; color: #666;">Zahlungsmethode: ${methodName}</p>
-                    <p style="font-size: 14px; color: #666;">Betrag: €${betrag.toFixed(2)}</p>
-                    <div style="margin-top: 24px; padding: 12px; background: #f3f4f6; border-radius: 6px; border-left: 4px solid #facc15;">
-                        <p style="font-size: 12px; color: #666;">Bitte warten...</p>
-                        <div style="margin-top: 12px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
-                            <div style="height: 100%; background: #facc15; width: 0%; animation: progress 3s ease-in-out forwards;"></div>
-                        </div>
+                <div style="text-align: center; padding: 20px;">
+                    <p style="font-size: 48px; margin-bottom: 12px;">⏳</p>
+                    <p style="font-size: 14px; color: #666;">Bitte warten...</p>
+                    <div style="margin-top: 16px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+                        <div style="height: 100%; background: #facc15; width: 0%; animation: progress 3s ease-in-out forwards;"></div>
                     </div>
                 </div>
-                <style>
-                    @keyframes progress {
-                        0% { width: 0%; }
-                        100% { width: 100%; }
-                    }
-                </style>
+                <style>@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }</style>
             `;
-            
-            setTimeout(() => {
-                showPaymentSuccess(methodName, betrag);
-            }, 3500);
-        }
-
-        function goBackToPaymentMethodSelection() {
-            openPaymentModal();
+            setTimeout(() => showPaymentSuccess(method, betrag), 3500);
         }
 
         function showPaymentSuccess(method, betrag) {
             document.getElementById('payment-step-title').textContent = '✅ Zahlung erfolgreich!';
             document.getElementById('payment-content').innerHTML = `
-                <div class="modal-box yellow" style="text-align: center; padding: 24px;">
-                    <p style="font-size: 48px; margin-bottom: 16px;">✅</p>
-                    <p style="font-size: 18px; font-weight: bold; color: #ca8a04; margin-bottom: 8px;">Zahlung erhalten!</p>
-                    <p style="font-size: 14px; color: #666;">Vielen Dank für deine Buchung</p>
-                </div>
-                
-                <div class="modal-box" style="margin-bottom: 16px;">
-                    <p style="font-weight: bold; margin-bottom: 8px;">Zahlungsart:</p>
-                    <p>${method}</p>
-                    <p style="font-weight: bold; margin-top: 12px; margin-bottom: 8px;">Betrag:</p>
-                    <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${betrag.toFixed(2)}</p>
-                </div>
-                
-                <button id="confirm-booking-btn" class="btn btn-yellow" style="width: 100%; padding: 12px;">Buchung abschließen</button>
+                <div class="modal-price"><div class="label">Betrag erhalten</div><div class="amount">€${betrag.toFixed(2)}</div></div>
+                <div class="modal-info">Zahlungsart: ${method === 'paypal' ? '🅿️ PayPal' : '🏦 Bankverbindung'}</div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="confirmPaymentAndBook()">Buchung abschließen</button>
             `;
-            
-            // Event Listener hinzufügen NACH dem innerHTML gesetzt wurde
-            setTimeout(() => {
-                const btn = document.getElementById('confirm-booking-btn');
-                if (btn) {
-                    btn.addEventListener('click', confirmPaymentAndBook);
-                }
-            }, 0);
         }
 
         function confirmPaymentAndBook() {
-            const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
-                ? appState.selectedAngebote 
-                : [appState.selectedAngebot];
-            
+            const angebote = appState.selectedAngebote || [];
             const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
             
             angebote.forEach(a => {
-                const newBuchung = {
+                appState.confirmedListings.push({
                     id: Math.random().toString(36).substr(2, 9),
                     angebot: a,
                     spielerName: appState.currentUser.name,
-                    spielerEmail: appState.spielerEmail || '(keine Email)',
-                    totalBetrag: totalBetrag,
-                    bookingDate: new Date().toLocaleDateString('de-DE'),
-                };
-                
+                    spielerEmail: appState.spielerEmail,
+                });
                 appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(x => x.id !== a.id);
-                appState.confirmedListings.push(newBuchung);
             });
             
             appState.selectedAngebote = [];
-            appState.selectedAngebot = null;
-            
-            // Alle Modals schließen
             document.getElementById('payment-modal').classList.add('hidden');
             document.getElementById('buchung-modal').classList.add('hidden');
             
-            // Email-Bestätigung zeigen
-            showEmailConfirmation(angebote, totalBetrag);
-        }
-
-        function showEmailConfirmation(angebote, totalBetrag) {
             const emailHTML = `
-                <div class="email-template">
-                    <div class="email-header">Z88 ZWEITMARKT</div>
-                    <div class="email-body">
-                        <p>Hallo ${appState.currentUser.name},</p>
-                        
-                        <p>deine Buchung wurde erfolgreich abgeschlossen! 🎉</p>
-                        
-                        <p style="font-weight: bold; color: #ca8a04; font-size: 16px;">Viel Spaß auf dem Platz! 🎾</p>
-                        
-                        <div class="email-booking">
-                            <p style="font-weight: bold; margin-bottom: 12px;">📋 Buchungsdetails:</p>
-                            ${angebote.map((a, i) => `
-                                <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #d1d5db;">
-                                    <p><strong>Stunde ${i + 1}:</strong> ${a.platz}</p>
-                                    <p>📅 ${a.datum}</p>
-                                    <p>⏰ ${a.uhrzeit}</p>
-                                    <p style="color: #999;">Vermieter: ${a.mieterName}</p>
-                                    <p style="font-weight: bold; color: #ca8a04;">💰 €${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
-                                </div>
-                            `).join('')}
-                            <p style="font-weight: bold; margin-top: 12px;">
-                                Gesamtbetrag: €${totalBetrag.toFixed(2)}
-                            </p>
-                        </div>
-                        
-                        <p style="margin-top: 16px;">Weitere Informationen findest du in der Z88 App oder unter www.zehlendorf88.de</p>
-                        
-                        <p>Viele Grüße,<br>Das Z88 Team 🏐</p>
-                    </div>
-                    <div class="email-footer">
-                        © 2026 Z88 Zehlendorf Tennisverein | www.zehlendorf88.de
+                <div style="font-size: 14px; line-height: 1.6; color: #333;">
+                    <p>Hallo ${appState.currentUser.name},</p>
+                    <p style="margin-top: 12px;">deine Buchung wurde erfolgreich bestätigt! 🎉</p>
+                    <p style="margin-top: 8px; font-size: 16px; font-weight: 700; color: #ca8a04;">Viel Spaß auf dem Platz! 🎾</p>
+                    <div style="background: #f8f9fa; padding: 14px; border-radius: 8px; margin-top: 16px;">
+                        ${angebote.map(a => `
+                            <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
+                                <p><strong>${a.platz}</strong></p>
+                                <p style="color: #666; font-size: 13px;">📅 ${a.datum}</p>
+                                <p style="color: #666; font-size: 13px;">⏰ ${a.uhrzeit}</p>
+                                <p style="color: #999; font-size: 12px;">Von: ${a.mieterName}</p>
+                                <p style="color: #ca8a04; font-weight: 600; margin-top: 6px;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
+                            </div>
+                        `).join('')}
+                        <p style="margin-top: 12px; font-weight: 600;">Gesamtbetrag: €${totalBetrag.toFixed(2)}</p>
                     </div>
                 </div>
             `;
@@ -1006,18 +727,22 @@
             renderSpielerDashboard();
         }
 
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
         function logout() {
             appState.currentUser = null;
             appState.currentEmail = null;
             appState.spielerEmail = '';
+            appState.selectedStunden = [];
+            appState.selectedAngebote = [];
             document.getElementById('mieter-email').value = '';
             document.getElementById('mieter-number').value = '';
             document.getElementById('spieler-name').value = '';
             document.getElementById('spieler-email').value = '';
-            goToScreen('login');
+            goToScreen('initial-login');
         }
-
-        goToScreen('login');
     </script>
 </body>
 </html>
