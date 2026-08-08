@@ -6,6 +6,7 @@
     <title>Z88 Zweitmarkt</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; }
         button { cursor: pointer; border: none; font-family: inherit; font-size: 16px; }
         input, select { font-family: inherit; font-size: 16px; }
@@ -66,6 +67,19 @@
         .price-breakdown { background: #f3f4f6; padding: 8px; border-radius: 4px; font-size: 12px; }
         
         .success { background: #fef3c7; border: 4px solid #facc15; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+        
+        .calendar-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
+        .calendar-nav button { padding: 8px 12px; background: black; color: #facc15; border: 2px solid #facc15; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .calendar-nav .week-display { text-align: center; font-weight: bold; }
+        .calendar-week { display: grid; gap: 12px; }
+        .calendar-item { background: white; border-radius: 8px; padding: 12px; border-left: 4px solid #facc15; display: flex; justify-content: space-between; align-items: center; }
+        
+        .email-template { background: white; border: 1px solid #d1d5db; border-radius: 8px; padding: 24px; font-size: 14px; line-height: 1.6; }
+        .email-header { background: black; color: #facc15; padding: 16px; border-radius: 8px 8px 0 0; text-align: center; font-weight: bold; font-size: 18px; }
+        .email-body { padding: 24px; }
+        .email-body p { margin-bottom: 12px; }
+        .email-booking { background: #fef3c7; padding: 16px; border-radius: 6px; margin: 16px 0; }
+        .email-footer { background: #f3f4f6; padding: 16px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px; }
     </style>
 </head>
 <body>
@@ -132,25 +146,19 @@
         <div class="content">
             <div class="section">
                 <div class="info-box">
-                    <p class="label">Preisstruktur nach Tageszeit:</p>
-                    <div class="price-row"><span>07:00-09:00</span><span>→ 22€</span></div>
-                    <div class="price-row"><span>09:00-15:00</span><span>→ 24€</span></div>
-                    <div class="price-row"><span>15:00-18:00</span><span>→ 26€</span></div>
-                    <div class="price-row"><span>18:00-22:00</span><span>→ 28€</span></div>
-                    <div class="price-row"><span>22:00-07:00</span><span>→ 22€</span></div>
-                </div>
-            </div>
-
-            <div class="section">
-                <div class="info-box">
                     <p class="label">💳 Zahlungsmethoden</p>
                     <p id="payment-info-display"></p>
                 </div>
             </div>
 
             <div class="section">
-                <h2 id="abo-count">Deine Abostunden (0)</h2>
-                <div id="abos-list"></div>
+                <h2>Deine Abostunden</h2>
+                <div class="calendar-nav">
+                    <button onclick="previousWeek()">← Vorherige</button>
+                    <div class="week-display" id="week-display">KW XX</div>
+                    <button onclick="nextWeek()">Nächste →</button>
+                </div>
+                <div id="calendar-weeks"></div>
             </div>
 
             <div class="section">
@@ -191,12 +199,6 @@
             </div>
         </div>
         <div class="content">
-            <div class="section">
-                <div class="info-box">
-                    <p class="label">🎾 Spontan spielen zum Vorteilspreis</p>
-                    <p>Buche nicht genutzte Abostunden mit bis zu 50% Rabatt!</p>
-                </div>
-            </div>
             <div id="success-msg"></div>
             <div class="section">
                 <h2 id="plaetze-count">Verfügbare Plätze (0)</h2>
@@ -236,7 +238,17 @@
         </div>
     </div>
 
+    <!-- EMAIL-BESTÄTIGUNG MODAL -->
+    <div id="email-modal" class="hidden modal-overlay" onclick="if(event.target === this) closeEmailModal()">
+        <div class="modal" style="max-width: 600px;">
+            <h3 style="text-align: center; margin-bottom: 24px;">✅ Buchung erfolgreich!</h3>
+            <div id="email-content"></div>
+            <button class="btn btn-yellow" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="closeEmailModal()">Fertig</button>
+        </div>
+    </div>
+
     <script>
+        // APP STATE
         const appState = {
             currentScreen: 'login',
             currentUser: null,
@@ -244,6 +256,9 @@
             spielerEmail: '',
             selectedStunde: null,
             selectedAngebot: null,
+            selectedAngebote: [],
+            selectedStunden: [],
+            currentWeekOffset: 0,
             
             mieterDB: {
                 'max.mueller@example.de': {
@@ -251,20 +266,39 @@
                     email: 'max.mueller@example.de',
                     mitgliedsnummer: '2024001',
                     zahlungsarten: [{ id: 1, typ: 'paypal', wert: 'max.mueller@paypal.com' }],
-                    abostunden: [
-                        { id: 1, platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28 },
-                        { id: 2, platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28 },
-                        { id: 3, platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28 },
-                        { id: 4, platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28 },
-                    ],
+                    abostunden: generateAbostunden(),
                 },
             },
             
             zweitmarktAngebote: [],
             confirmedListings: [],
-            selectedAngebote: [],
-            selectedStunden: [],
         };
+
+        function generateAbostunden() {
+            const stunden = [];
+            let id = 1;
+            const startDate = new Date(2026, 9, 7); // 7. Oktober 2026 (Mittwoch)
+            const endDate = new Date(2027, 2, 31);
+            
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 7)) {
+                const dateStr = d.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                stunden.push({
+                    id: id++,
+                    platz: 'Platz 1',
+                    datum: dateStr,
+                    uhrzeit: '18:00-19:00',
+                    originalMiete: 28,
+                });
+                stunden.push({
+                    id: id++,
+                    platz: 'Platz 1',
+                    datum: dateStr,
+                    uhrzeit: '19:00-20:00',
+                    originalMiete: 28,
+                });
+            }
+            return stunden;
+        }
 
         function updatePaymentInput() {
             const typ = document.getElementById('zahlungsart-typ').value;
@@ -301,6 +335,7 @@
             if (email === 'max.mueller@example.de' && number === '2024001') {
                 appState.currentUser = { ...appState.mieterDB[email] };
                 appState.currentEmail = email;
+                appState.currentWeekOffset = 0;
                 renderMieterDashboard();
                 goToScreen('mieter-dashboard');
             } else {
@@ -335,33 +370,37 @@
             }).join('<br>');
             document.getElementById('payment-info-display').innerHTML = paymentInfo;
             
-            // Abostunden
-            document.getElementById('abo-count').textContent = `Deine Abostunden (${mieter.abostunden.length})`;
-            const abosList = document.getElementById('abos-list');
-            abosList.innerHTML = mieter.abostunden.length === 0 ? '<p style="color: #999;">Alle freigegeben!</p>' :
-                mieter.abostunden.map(s => {
+            // Kalender-Wochen anzeigen
+            const startDate = new Date(2026, 9, 7);
+            const weekStart = new Date(startDate);
+            weekStart.setDate(weekStart.getDate() + (appState.currentWeekOffset * 7));
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            
+            const weekNum = Math.floor((weekStart - startDate) / (7 * 24 * 60 * 60 * 1000)) + 1;
+            document.getElementById('week-display').textContent = `Woche ${weekNum} (${weekStart.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})} - ${weekEnd.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})})`;
+            
+            const weekStunden = mieter.abostunden.filter(s => {
+                const sDate = new Date(s.datum.split('.').reverse().join('-'));
+                return sDate >= weekStart && sDate <= weekEnd;
+            });
+            
+            const calendarList = document.getElementById('calendar-weeks');
+            calendarList.innerHTML = weekStunden.length === 0 ? '<p style="color: #999;">Keine Stunden in dieser Woche</p>' :
+                weekStunden.map(s => {
                     const isSelected = appState.selectedStunden && appState.selectedStunden.find(x => x.id === s.id);
                     return `
-                        <div class="card-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer; display: flex; gap: 12px;" onclick="toggleStundenSelection(${s.id})">
-                            <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-top: 4px; width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;" onclick="event.stopPropagation(); toggleStundenSelection(${s.id})">
-                            <div class="card-left" style="flex: 1;">
-                                <h3>${s.platz}</h3>
-                                <p>${s.datum} • ${s.uhrzeit}</p>
-                                <p style="font-size: 12px; color: #999; margin-top: 4px;">Original-Miete: €${s.originalMiete}</p>
+                        <div class="calendar-item" style="border: ${isSelected ? '2px solid #facc15' : '1px solid #d1d5db'}; background: ${isSelected ? '#fef3c7' : 'white'}; cursor: pointer;" onclick="toggleStundenSelection(${s.id})">
+                            <div style="flex: 1;">
+                                <input type="checkbox" ${isSelected ? 'checked' : ''} style="margin-right: 8px; width: 16px; height: 16px; cursor: pointer;" onclick="event.stopPropagation(); toggleStundenSelection(${s.id})">
+                                <span style="font-weight: bold;">${s.datum} • ${s.uhrzeit}</span>
+                                <p style="font-size: 12px; color: #999; margin-top: 4px;">€${s.originalMiete}</p>
                             </div>
+                            <button class="btn btn-black btn-small" onclick="event.stopPropagation(); openFreigabeModal(${s.id})" style="color: #facc15; border: 2px solid #facc15;">+ Freigeben</button>
                         </div>
                     `;
                 }).join('');
-            
-            // Zeige Button wenn Stunden ausgewählt sind
-            if (appState.selectedStunden && appState.selectedStunden.length > 0) {
-                abosList.innerHTML += `
-                    <div class="modal-box yellow" style="margin-top: 16px;">
-                        <div class="price-row"><span>Ausgewählte Stunden:</span><span style="font-weight: bold;">${appState.selectedStunden.length}</span></div>
-                        <button class="btn btn-black" style="width: 100%; margin-top: 12px; padding: 12px; color: #facc15; border: 2px solid #facc15;" onclick="openMultiFreigabeModal()">📤 ${appState.selectedStunden.length} Stunde(n) freigeben</button>
-                    </div>
-                `;
-            }
             
             // Weitervermiete Stunden
             const weitervermiet = appState.confirmedListings.filter(c => c.angebot.mieterId === appState.currentEmail);
@@ -375,12 +414,35 @@
                             <p>${b.angebot.datum} • ${b.angebot.uhrzeit}</p>
                             <div class="price-info">
                                 <p style="font-weight: bold;">✓ Weitervermietet an:</p>
-                                <p style="font-weight: bold; margin-top: 4px;">${b.spielerName}</p>
+                                <p>${b.spielerName}</p>
                                 <p style="color: #666;">${b.spielerEmail}</p>
                             </div>
                         </div>
                     </div>
                 `).join('');
+        }
+
+        function previousWeek() {
+            appState.currentWeekOffset = Math.max(0, appState.currentWeekOffset - 1);
+            renderMieterDashboard();
+        }
+
+        function nextWeek() {
+            appState.currentWeekOffset++;
+            renderMieterDashboard();
+        }
+
+        function toggleStundenSelection(stundenId) {
+            if (!appState.selectedStunden) appState.selectedStunden = [];
+            
+            const index = appState.selectedStunden.findIndex(s => s.id === stundenId);
+            if (index > -1) {
+                appState.selectedStunden.splice(index, 1);
+            } else {
+                const stunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
+                if (stunde) appState.selectedStunden.push(stunde);
+            }
+            renderMieterDashboard();
         }
 
         function renderSpielerDashboard() {
@@ -419,7 +481,6 @@
                     `;
                 }).join('');
             
-            // Zeige Button wenn Stunden ausgewählt sind
             if (appState.selectedAngebote && appState.selectedAngebote.length > 0) {
                 const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
                 const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
@@ -436,89 +497,52 @@
             }
         }
 
-        function toggleStundenSelection(stundenId) {
-            if (!appState.selectedStunden) appState.selectedStunden = [];
+        function toggleStundeSelection(angebotId) {
+            if (!appState.selectedAngebote) appState.selectedAngebote = [];
             
-            const index = appState.selectedStunden.findIndex(s => s.id === stundenId);
+            const index = appState.selectedAngebote.findIndex(a => a.id === angebotId);
             if (index > -1) {
-                appState.selectedStunden.splice(index, 1);
+                appState.selectedAngebote.splice(index, 1);
             } else {
-                const stunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
-                if (stunde) appState.selectedStunden.push(stunde);
+                const angebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
+                if (angebot) appState.selectedAngebote.push(angebot);
             }
-            renderMieterDashboard();
+            renderSpielerDashboard();
         }
 
-        function openMultiFreigabeModal() {
-            if (!appState.selectedStunden || appState.selectedStunden.length === 0) {
+        function openMultiBookingModal() {
+            if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) {
                 alert('Bitte wähle mindestens eine Stunde aus!');
                 return;
             }
             
-            document.getElementById('freigabe-title').textContent = `${appState.selectedStunden.length} Stunde(n) freigeben`;
+            const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
+            const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
             
-            const stunden = appState.selectedStunden;
-            const gesamt = stunden.reduce((sum, s) => sum + s.originalMiete, 0);
-            
-            document.getElementById('freigabe-info').innerHTML = `
-                <p style="font-size: 14px; color: #666; margin-bottom: 12px;">Ausgewählte Stunden:</p>
-                ${stunden.map(s => `
+            document.getElementById('buchung-info').innerHTML = `
+                <p style="font-weight: bold; margin-bottom: 12px;">Übersicht:</p>
+                ${appState.selectedAngebote.map(a => `
                     <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
-                        <p style="font-weight: bold;">${s.platz}</p>
-                        <p style="color: #666;">${s.datum} • ${s.uhrzeit}</p>
-                        <p style="color: #999; margin-top: 4px;">Original: €${s.originalMiete}</p>
+                        <p style="font-weight: bold;">${a.platz}</p>
+                        <p style="color: #666;">${a.datum} • ${a.uhrzeit}</p>
+                        <p style="color: #999;">Anbieter: ${a.mieterName}</p>
+                        <p style="font-weight: bold; color: #ca8a04;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
                     </div>
                 `).join('')}
-                <div style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 12px;">
-                    <p style="font-weight: bold;">Gesamt Original-Miete: €${gesamt}</p>
-                </div>
+                ${anbieterSet.size > 1 ? `
+                    <div style="background: #fef3c7; border: 1px solid #facc15; padding: 8px; border-radius: 4px; margin-top: 12px; font-size: 12px;">
+                        <p style="font-weight: bold; color: #ca8a04;">⚠️ Mehrere Zahlungen</p>
+                        <p style="color: #666; margin-top: 4px;">Stunden von verschiedenen Anbietern werden separat abgerechnet.</p>
+                    </div>
+                ` : ''}
             `;
             
-            const options = document.getElementById('freigabe-options');
-            options.innerHTML = [50, 60].map(percent => {
-                const verkaufspreis = (gesamt * percent) / 100;
-                const vereinGebuehr = verkaufspreis * 0.1;
-                return `
-                    <button class="price-option" onclick="handleMultiFreigeben(${percent}, ${verkaufspreis})">
-                        <h4>${percent}% = €${verkaufspreis.toFixed(2)}</h4>
-                        <div class="price-breakdown">
-                            <div class="price-row"><span>Spieler zahlen insgesamt:</span><span style="font-weight: bold; color: #16a34a;">€${(verkaufspreis + vereinGebuehr).toFixed(2)}</span></div>
-                            <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 4px; margin-top: 4px;"><span>Du erhältst:</span><span style="font-weight: bold; color: #ca8a04;">€${verkaufspreis.toFixed(2)}</span></div>
-                            <p style="font-size: 11px; color: #666; margin-top: 6px;">(Verein erhält: €${vereinGebuehr.toFixed(2)})</p>
-                        </div>
-                    </button>
-                `;
-            }).join('');
+            document.getElementById('buchung-price').innerHTML = `
+                <p style="font-size: 14px; color: #666;">Gesamtbetrag:</p>
+                <p style="font-size: 32px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
+            `;
             
-            document.getElementById('freigabe-modal').classList.remove('hidden');
-        }
-
-        function handleMultiFreigeben(percent, gesamtverkaufspreis) {
-            if (!appState.selectedStunden || appState.selectedStunden.length === 0) return;
-            
-            const stunden = appState.selectedStunden;
-            const durchschnittspreis = gesamtverkaufspreis / stunden.length;
-            
-            stunden.forEach(stunde => {
-                appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stunde.id);
-                
-                appState.zweitmarktAngebote.push({
-                    id: Math.random(),
-                    platz: stunde.platz,
-                    datum: stunde.datum,
-                    uhrzeit: stunde.uhrzeit,
-                    originalMiete: stunde.originalMiete,
-                    verkaufspreis: durchschnittspreis,
-                    mieterId: appState.currentEmail,
-                    mieterName: appState.currentUser.name,
-                    mieterZahlungsarten: appState.currentUser.zahlungsarten,
-                });
-            });
-            
-            appState.selectedStunden = [];
-            closeFreigabeModal();
-            renderMieterDashboard();
-            alert(`✅ ${stunden.length} Stunde(n) freigegeben! (${percent}% Rabatt)`);
+            document.getElementById('buchung-modal').classList.remove('hidden');
         }
 
         function openFreigabeModal(stundenId) {
@@ -556,7 +580,7 @@
                 datum: stunde.datum,
                 uhrzeit: stunde.uhrzeit,
                 originalMiete: stunde.originalMiete,
-                verkaufspreis,
+                verkaufspreis: verkaufspreis,
                 mieterId: appState.currentEmail,
                 mieterName: appState.currentUser.name,
                 mieterZahlungsarten: appState.currentUser.zahlungsarten,
@@ -571,59 +595,6 @@
             document.getElementById('freigabe-modal').classList.add('hidden');
         }
 
-        function toggleStundeSelection(angebotId) {
-            if (!appState.selectedAngebote) appState.selectedAngebote = [];
-            
-            const index = appState.selectedAngebote.findIndex(a => a.id === angebotId);
-            if (index > -1) {
-                appState.selectedAngebote.splice(index, 1);
-            } else {
-                const angebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
-                if (angebot) appState.selectedAngebote.push(angebot);
-            }
-            renderSpielerDashboard();
-        }
-
-        function openMultiBookingModal() {
-            if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) {
-                alert('Bitte wähle mindestens eine Stunde aus!');
-                return;
-            }
-            
-            const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-            const anbieterSet = new Set(appState.selectedAngebote.map(a => a.mieterId));
-            
-            let infoText = `${appState.selectedAngebote.length} Stunde(n) werden gebucht`;
-            if (anbieterSet.size > 1) {
-                infoText += `\n⚠️ Achtung: ${anbieterSet.size} verschiedene Anbieter\n→ Es werden mehrere Zahlungen durchgeführt`;
-            }
-            
-            document.getElementById('buchung-info').innerHTML = `
-                <p style="font-weight: bold; margin-bottom: 12px;">Übersicht:</p>
-                ${appState.selectedAngebote.map(a => `
-                    <div style="background: #f3f4f6; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 13px;">
-                        <p style="font-weight: bold;">${a.platz}</p>
-                        <p style="color: #666;">${a.datum} • ${a.uhrzeit}</p>
-                        <p style="color: #999;">Anbieter: ${a.mieterName}</p>
-                        <p style="font-weight: bold; color: #ca8a04;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
-                    </div>
-                `).join('')}
-                ${anbieterSet.size > 1 ? `
-                    <div style="background: #fef3c7; border: 1px solid #facc15; padding: 8px; border-radius: 4px; margin-top: 12px; font-size: 12px;">
-                        <p style="font-weight: bold; color: #ca8a04;">⚠️ Mehrere Zahlungen</p>
-                        <p style="color: #666; margin-top: 4px;">Stunden von verschiedenen Anbietern werden separat abgerechnet.</p>
-                    </div>
-                ` : ''}
-            `;
-            
-            document.getElementById('buchung-price').innerHTML = `
-                <p style="font-size: 14px; color: #666;">Gesamtbetrag:</p>
-                <p style="font-size: 32px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
-            `;
-            
-            document.getElementById('buchung-modal').classList.remove('hidden');
-        }
-
         function openBuchungModal(angebotId) {
             appState.selectedAngebot = appState.zweitmarktAngebote.find(a => a.id === angebotId);
             const a = appState.selectedAngebot;
@@ -635,48 +606,38 @@
             document.getElementById('buchung-modal').classList.remove('hidden');
         }
 
-        function handleBuchungBestätigen() {
-            const newBuchung = {
-                id: Math.random().toString(36).substr(2, 9),
-                angebot: appState.selectedAngebot,
-                spielerName: appState.currentUser.name,
-                spielerEmail: appState.spielerEmail || '(keine Email)',
-            };
-            
-            appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(a => a.id !== appState.selectedAngebot.id);
-            appState.confirmedListings.push(newBuchung);
-            
-            closeBuchungModal();
-            document.getElementById('success-msg').innerHTML = '<div class="success">✅ Buchung bestätigt!</div>';
-            setTimeout(() => { document.getElementById('success-msg').innerHTML = ''; }, 5000);
-            renderSpielerDashboard();
-        }
-
         function closeBuchungModal() {
             document.getElementById('buchung-modal').classList.add('hidden');
         }
 
         function openPaymentModal() {
-            const a = appState.selectedAngebot;
-            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
+            const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
+                ? appState.selectedAngebote 
+                : [appState.selectedAngebot];
+            const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
             
             document.getElementById('payment-step-title').textContent = 'Zahlungsmethode wählen';
             document.getElementById('payment-content').innerHTML = `
                 <div class="modal-box yellow" style="margin-bottom: 16px;">
                     <p style="font-size: 14px; color: #666; margin-bottom: 4px;">Zahlbetrag:</p>
-                    <p style="font-size: 28px; font-weight: bold; color: #ca8a04;">€${spielerZahlt.toFixed(2)}</p>
+                    <p style="font-size: 28px; font-weight: bold; color: #ca8a04;">€${totalBetrag.toFixed(2)}</p>
                 </div>
                 
                 <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px;">Wähle deine Zahlungsart:</p>
                 
-                <button class="price-option" onclick="processPayment('paypal', ${spielerZahlt})">
+                <button class="price-option" onclick="processPayment('paypal', ${totalBetrag})">
                     <h4>🅿️ PayPal</h4>
                     <p style="font-size: 12px; color: #666; margin: 8px 0;">Sichere Online-Zahlung</p>
                 </button>
                 
-                <button class="price-option" onclick="processPayment('iban', ${spielerZahlt})">
+                <button class="price-option" onclick="processPayment('iban', ${totalBetrag})">
                     <h4>🏦 Bankverbindung (IBAN)</h4>
                     <p style="font-size: 12px; color: #666; margin: 8px 0;">Direkte Banküberweisung</p>
+                </button>
+                
+                <button class="price-option" style="background: #ffebee;" onclick="processPayment('failed', ${totalBetrag})">
+                    <h4>❌ Zahlung simulieren (Fehler)</h4>
+                    <p style="font-size: 12px; color: #d32f2f; margin: 8px 0;">Test: Zahlung wird abgelehnt</p>
                 </button>
                 
                 <button class="btn btn-gray" style="width: 100%; margin-top: 12px;" onclick="closePaymentModal()">Abbrechen</button>
@@ -685,6 +646,19 @@
         }
 
         function processPayment(method, betrag) {
+            if (method === 'failed') {
+                document.getElementById('payment-step-title').textContent = '❌ Zahlung abgelehnt!';
+                document.getElementById('payment-content').innerHTML = `
+                    <div class="modal-box" style="background: #ffebee; border: 2px solid #d32f2f; text-align: center; padding: 32px 16px;">
+                        <p style="font-size: 48px; margin-bottom: 16px;">❌</p>
+                        <p style="font-size: 16px; font-weight: bold; color: #d32f2f; margin-bottom: 8px;">Zahlung nicht erfolgt</p>
+                        <p style="font-size: 14px; color: #d32f2f; margin-bottom: 16px;">Bitte versuche es mit einer anderen Zahlungsart</p>
+                        <button class="btn btn-gray" style="width: 100%;" onclick="goBackToPaymentMethodSelection()">Zurück</button>
+                    </div>
+                `;
+                return;
+            }
+
             const methodName = method === 'paypal' ? 'PayPal' : 'Banküberweisung';
             
             document.getElementById('payment-step-title').textContent = 'Zahlung wird verarbeitet...';
@@ -714,11 +688,11 @@
             }, 3500);
         }
 
+        function goBackToPaymentMethodSelection() {
+            openPaymentModal();
+        }
+
         function showPaymentSuccess(method, betrag) {
-            const a = appState.selectedAngebot;
-            const vereinGebuehr = (a.verkaufspreis * 0.1).toFixed(2);
-            const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-            
             document.getElementById('payment-step-title').textContent = '✅ Zahlung erfolgreich!';
             document.getElementById('payment-content').innerHTML = `
                 <div class="modal-box yellow" style="text-align: center; padding: 24px;">
@@ -728,32 +702,24 @@
                 </div>
                 
                 <div class="modal-box" style="margin-bottom: 16px;">
-                    <p style="font-weight: bold; margin-bottom: 12px;">Zahlungsdetails:</p>
-                    <div class="price-row"><span>Platz:</span><span>${a.platz}</span></div>
-                    <div class="price-row"><span>Datum:</span><span>${a.datum}</span></div>
-                    <div class="price-row"><span>Zeit:</span><span>${a.uhrzeit}</span></div>
-                    <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px;"><span>Platz-Preis:</span><span>€${a.verkaufspreis.toFixed(2)}</span></div>
-                    <div class="price-row"><span>Verein-Gebühr (10%):</span><span>€${vereinGebuehr}</span></div>
-                    <div class="price-row" style="border-top: 1px solid #d1d5db; padding-top: 8px; margin-top: 8px; font-weight: bold;"><span>Gesamtbetrag:</span><span style="color: #ca8a04;">€${spielerZahlt.toFixed(2)}</span></div>
-                </div>
-                
-                <div class="modal-box" style="background: #f3f4f6; margin-bottom: 16px;">
                     <p style="font-weight: bold; margin-bottom: 8px;">Zahlungsart:</p>
                     <p>${method}</p>
+                    <p style="font-weight: bold; margin-top: 12px; margin-bottom: 8px;">Betrag:</p>
+                    <p style="font-size: 20px; font-weight: bold; color: #ca8a04;">€${betrag.toFixed(2)}</p>
                 </div>
                 
-                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="confirmPaymentAndBook()">✓ Buchung abschließen</button>
+                <button class="btn btn-yellow" style="width: 100%; padding: 12px;" onclick="confirmPaymentAndBook()">Buchung abschließen</button>
             `;
         }
 
         function confirmPaymentAndBook() {
-            closeBuchungModal();
             closePaymentModal();
             
-            // Single oder Multi-Buchung
             const angebote = appState.selectedAngebote && appState.selectedAngebote.length > 0 
                 ? appState.selectedAngebote 
                 : [appState.selectedAngebot];
+            
+            const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
             
             angebote.forEach(a => {
                 const newBuchung = {
@@ -761,6 +727,8 @@
                     angebot: a,
                     spielerName: appState.currentUser.name,
                     spielerEmail: appState.spielerEmail || '(keine Email)',
+                    totalBetrag: totalBetrag,
+                    bookingDate: new Date().toLocaleDateString('de-DE'),
                 };
                 
                 appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(x => x.id !== a.id);
@@ -770,14 +738,56 @@
             appState.selectedAngebote = [];
             appState.selectedAngebot = null;
             
-            const count = angebote.length;
-            document.getElementById('success-msg').innerHTML = `<div class="success">✅ ${count} Stunde(n) gebucht! Zahlung(en) erhalten!</div>`;
-            setTimeout(() => { document.getElementById('success-msg').innerHTML = ''; }, 5000);
-            renderSpielerDashboard();
+            showEmailConfirmation(angebote, totalBetrag);
+            closeBuchungModal();
         }
 
-        function closePaymentModal() {
-            document.getElementById('payment-modal').classList.add('hidden');
+        function showEmailConfirmation(angebote, totalBetrag) {
+            const emailHTML = `
+                <div class="email-template">
+                    <div class="email-header">Z88 ZWEITMARKT</div>
+                    <div class="email-body">
+                        <p>Hallo ${appState.currentUser.name},</p>
+                        
+                        <p>deine Buchung wurde erfolgreich abgeschlossen! 🎉</p>
+                        
+                        <p style="font-weight: bold; color: #ca8a04; font-size: 16px;">Viel Spaß auf dem Platz! 🎾</p>
+                        
+                        <div class="email-booking">
+                            <p style="font-weight: bold; margin-bottom: 12px;">📋 Buchungsdetails:</p>
+                            ${angebote.map((a, i) => `
+                                <div style="margin-bottom: 12px;">
+                                    <p><strong>Stunde ${i + 1}:</strong> ${a.platz}</p>
+                                    <p>📅 ${a.datum}</p>
+                                    <p>⏰ ${a.uhrzeit}</p>
+                                    <p>💰 €${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
+                                </div>
+                            `).join('')}
+                            <p style="border-top: 1px solid #d1d5db; padding-top: 12px; margin-top: 12px; font-weight: bold;">
+                                Gesamtbetrag: €${totalBetrag.toFixed(2)}
+                            </p>
+                        </div>
+                        
+                        <p style="margin-top: 16px;">Weitere Informationen findest du in der Z88 App oder unter www.zehlendorf88.de</p>
+                        
+                        <p>Viele Grüße,<br>Das Z88 Team 🏐</p>
+                    </div>
+                    <div class="email-footer">
+                        © 2026 Z88 Zehlendorf Tennisverein | www.zehlendorf88.de
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('email-content').innerHTML = emailHTML;
+            document.getElementById('email-modal').classList.remove('hidden');
+            
+            document.getElementById('success-msg').innerHTML = '<div class="success">✅ Buchung erfolgreich! Bestätigungs-Email wurde gesendet!</div>';
+            setTimeout(() => { document.getElementById('success-msg').innerHTML = ''; }, 5000);
+        }
+
+        function closeEmailModal() {
+            document.getElementById('email-modal').classList.add('hidden');
+            renderSpielerDashboard();
         }
 
         function logout() {
