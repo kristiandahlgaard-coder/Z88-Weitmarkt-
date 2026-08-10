@@ -136,6 +136,7 @@
             .offer-price { flex: 1 1 100%; text-align: left; margin-top: 8px; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 </head>
 <body>
     <!-- WELCOME SCREEN - BOOKING TABLE 1:1 LAYOUT -->
@@ -385,17 +386,27 @@
                         <input type="password" id="reg-passwort-repeat" placeholder="••••••••">
                     </div>
                     <hr style="margin: 16px 0; border: none; border-top: 1px solid #ddd;">
-                    <p style="font-weight: bold; margin-bottom: 12px;">Zahlungsinformationen</p>
-                    <div class="form-group">
-                        <label>Zahlungsart</label>
-                        <select id="reg-zahlungsart" onchange="updateRegPaymentInput()">
-                            <option value="paypal">🅿️ PayPal</option>
-                            <option value="iban">💳 Bankverbindung (IBAN)</option>
-                        </select>
+                    <p style="font-weight: bold; margin-bottom: 12px;">Zahlungsarten akzeptieren</p>
+                    <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 16px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
+                            <input type="checkbox" id="reg-paypal-checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="togglePayPalField()">
+                            <span>🅿️ PayPal</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                            <input type="checkbox" id="reg-iban-checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleIbanField()">
+                            <span>💳 Bankverbindung (IBAN)</span>
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label id="reg-payment-label">PayPal Email</label>
-                        <input type="text" id="reg-zahlungswert" placeholder="name@paypal.com">
+                    <div class="form-group" id="reg-paypal-field" style="display: none;">
+                        <label>PayPal.me-Name</label>
+                        <input type="text" id="reg-paypal-email" placeholder="maxmueller88">
+                        <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Findest du in der PayPal-App unter „PayPal.me-Link". Damit kann der Spieler mit einem Klick zahlen. Alternativ deine PayPal-E-Mail — dann muss er den Betrag selbst eintippen.</p>
+                    </div>
+                    <div class="form-group" id="reg-iban-field" style="display: none;">
+                        <label>IBAN</label>
+                        <input type="text" id="reg-iban-value" placeholder="DE89370400440532013000">
+                        <label style="margin-top: 10px;">BIC <span style="font-weight: normal; color: #666;">(optional)</span></label>
+                        <input type="text" id="reg-bic-value" placeholder="GENODEM1GLS">
                     </div>
                 </div>
                 <div class="button-group">
@@ -461,6 +472,11 @@
                     <div id="calendar-weeks"></div>
                 </div>
 
+                <div class="section" id="pending-section" style="display:none;">
+                    <h2><span class="section-icon">⏳</span> Zahlung ausstehend</h2>
+                    <div id="pending-list"></div>
+                </div>
+
                 <div class="section" id="released-section" style="display:none;">
                     <h2><span class="section-icon">📤</span> Freigegebene Stunden</h2>
                     <div id="released-list"></div>
@@ -488,6 +504,8 @@
         <div class="dashboard-content">
             <div class="dashboard-main">
                 <div id="success-msg"></div>
+
+                <div class="section" id="spieler-pending" style="display:none;"></div>
 
                 <div class="section" id="booked-section" style="display:none;">
                     <h2><span class="section-icon">✅</span> Meine gebuchten Stunden</h2>
@@ -535,17 +553,27 @@
 
                 <div class="section">
                     <h2>Zahlungsinformationen</h2>
+                    <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 16px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
+                            <input type="checkbox" id="profil-paypal-checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleProfilPayPalField()">
+                            <span>🅿️ PayPal</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                            <input type="checkbox" id="profil-iban-checkbox" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleProfilIbanField()">
+                            <span>💳 Bankverbindung (IBAN)</span>
+                        </label>
+                    </div>
                     <div class="login-form">
-                        <div class="form-group">
-                            <label>Zahlungsart</label>
-                            <select id="profil-zahlungsart" onchange="updateProfilPaymentInput()">
-                                <option value="paypal">🅿️ PayPal</option>
-                                <option value="iban">💳 Bankverbindung (IBAN)</option>
-                            </select>
+                        <div class="form-group" id="profil-paypal-field" style="display: none;">
+                            <label>PayPal.me-Name</label>
+                            <input type="text" id="profil-paypal-email" placeholder="maxmueller88">
+                            <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Alternativ deine PayPal-E-Mail — dann muss der Spieler den Betrag selbst eintippen.</p>
                         </div>
-                        <div class="form-group">
-                            <label id="profil-payment-label">PayPal Email</label>
-                            <input type="text" id="profil-zahlungswert" placeholder="name@paypal.com">
+                        <div class="form-group" id="profil-iban-field" style="display: none;">
+                            <label>IBAN</label>
+                            <input type="text" id="profil-iban-value" placeholder="DE89370400440532013000">
+                            <label style="margin-top: 10px;">BIC <span style="font-weight: normal; color: #666;">(optional)</span></label>
+                            <input type="text" id="profil-bic-value" placeholder="GENODEM1GLS">
                         </div>
                     </div>
                 </div>
@@ -629,13 +657,17 @@
                     mitgliedsnummer: '2024001',
                     passwort: 'test1234',
                     email: 'max.mueller@example.de',
-                    zahlungsart: 'paypal',
-                    zahlungswert: 'max.mueller@paypal.com',
+                    zahlungsartenPaypal: true,
+                    paypalEmail: 'maxmueller88',
+                    zahlungsartenUeberweisung: true,
+                    ibanValue: 'DE89370400440532013000',
+                    bicValue: 'GENODEM1GLS',
                     abostunden: generateAbostunden(),
                 },
             },
             
             zweitmarktAngebote: [],
+            reservierungen: [],
             confirmedListings: [],
         };
 
@@ -650,19 +682,6 @@
                 stunden.push({ id: id++, platz: 'Platz 1', datum: dateStr, uhrzeit: '19:00-20:00', originalMiete: 28 });
             }
             return stunden;
-        }
-
-        function updatePaymentInput() {
-            const typ = document.getElementById('zahlungsart-typ').value;
-            const label = document.getElementById('payment-label');
-            const input = document.getElementById('zahlungsart-wert');
-            if (typ === 'paypal') {
-                label.textContent = 'PayPal Email';
-                input.placeholder = 'name@paypal.com';
-            } else {
-                label.textContent = 'IBAN';
-                input.placeholder = 'DE89370400440532013000';
-            }
         }
 
         function goToScreen(screen) {
@@ -704,7 +723,29 @@
             }
         }
 
+        function togglePayPalField() {
+            const checkbox = document.getElementById('reg-paypal-checkbox').checked;
+            const field = document.getElementById('reg-paypal-field');
+            field.style.display = checkbox ? 'block' : 'none';
+        }
+
+        function toggleIbanField() {
+            const checkbox = document.getElementById('reg-iban-checkbox').checked;
+            const field = document.getElementById('reg-iban-field');
+            field.style.display = checkbox ? 'block' : 'none';
+        }
+
         function fillDemoData() {
+            if (appState.reservierungen.length === 0) {
+                appState.reservierungen.push({
+                    id: 'demo-res-1',
+                    angebot: { id: Math.random(), platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller', zahlungsartenUeberweisung: true, zahlungsartenPaypal: true },
+                    spielerName: 'Anna Schmidt',
+                    spielerEmail: 'anna.schmidt@example.de',
+                    zahlungsart: 'iban',
+                    reserviertAm: Date.now() - 3 * 60 * 60 * 1000
+                });
+            }
             document.getElementById('mieter-login-email').value = 'max.mueller@example.de';
             document.getElementById('mieter-login-passwort').value = 'test1234';
             handleMieterLogin();
@@ -755,10 +796,14 @@
             const mitgliedsnummer = document.getElementById('reg-mitgliedsnummer').value;
             const passwort = document.getElementById('reg-passwort').value;
             const passwortRepeat = document.getElementById('reg-passwort-repeat').value;
-            const zahlungsart = document.getElementById('reg-zahlungsart').value;
-            const zahlungswert = document.getElementById('reg-zahlungswert').value;
+            
+            const paypalChecked = document.getElementById('reg-paypal-checkbox').checked;
+            const ibanChecked = document.getElementById('reg-iban-checkbox').checked;
+            const paypalEmail = document.getElementById('reg-paypal-email').value;
+            const ibanValue = document.getElementById('reg-iban-value').value;
+            const bicValue = document.getElementById('reg-bic-value').value;
 
-            // Validierung
+            // Validierung - Grunddaten
             if (!email || !name || !mitgliedsnummer || !passwort) {
                 alert('Alle Felder erforderlich!');
                 return;
@@ -771,8 +816,18 @@
                 alert('Diese Email existiert bereits!');
                 return;
             }
-            if (!zahlungswert) {
-                alert('Zahlungsinformationen erforderlich!');
+
+            // Validierung - Zahlungsarten
+            if (!paypalChecked && !ibanChecked) {
+                alert('Mindestens eine Zahlungsart erforderlich!');
+                return;
+            }
+            if (paypalChecked && !paypalEmail) {
+                alert('PayPal Email erforderlich wenn PayPal akzeptiert wird!');
+                return;
+            }
+            if (ibanChecked && !ibanValue) {
+                alert('IBAN erforderlich wenn Überweisung akzeptiert wird!');
                 return;
             }
 
@@ -782,8 +837,11 @@
                 mitgliedsnummer: mitgliedsnummer,
                 passwort: passwort,
                 email: email,
-                zahlungsart: zahlungsart,
-                zahlungswert: zahlungswert,
+                zahlungsartenPaypal: paypalChecked,
+                paypalEmail: paypalEmail || '',
+                zahlungsartenUeberweisung: ibanChecked,
+                ibanValue: ibanValue || '',
+                bicValue: bicValue || '',
                 abostunden: generateAbostunden(),
             };
 
@@ -798,7 +856,13 @@
             document.getElementById('reg-mitgliedsnummer').value = '';
             document.getElementById('reg-passwort').value = '';
             document.getElementById('reg-passwort-repeat').value = '';
-            document.getElementById('reg-zahlungswert').value = '';
+            document.getElementById('reg-paypal-checkbox').checked = false;
+            document.getElementById('reg-iban-checkbox').checked = false;
+            document.getElementById('reg-paypal-email').value = '';
+            document.getElementById('reg-iban-value').value = '';
+            document.getElementById('reg-bic-value').value = '';
+            document.getElementById('reg-paypal-field').style.display = 'none';
+            document.getElementById('reg-iban-field').style.display = 'none';
 
             renderMieterDashboard();
             goToScreen('mieter-dashboard');
@@ -820,9 +884,12 @@
             const mieter = appState.currentUser;
             document.getElementById('mieter-name-display').textContent = mieter.name;
             
-            // Zahlungsinfos anzeigen
-            const zahlungsartText = mieter.zahlungsart === 'paypal' ? '🅿️ PayPal' : '💳 IBAN';
-            const paymentInfo = `${zahlungsartText}: ${mieter.zahlungswert}`;
+            // Zahlungsinfos anzeigen - beide Optionen
+            let paymentInfo = '';
+            const methods = [];
+            if (mieter.zahlungsartenPaypal) methods.push(`🅿️ PayPal (${mieter.paypalEmail})`);
+            if (mieter.zahlungsartenUeberweisung) methods.push(`💳 IBAN (${mieter.ibanValue})`);
+            paymentInfo = methods.length > 0 ? methods.join('<br>') : 'Keine Zahlungsart konfiguriert';
             document.getElementById('payment-info-display').innerHTML = paymentInfo;
             
             const startDate = new Date(2026, 9, 1);
@@ -868,20 +935,40 @@
                 `;
             }
             
+            verfalleneReservierungenAufraeumen();
+
+            const offeneReservierungen = appState.reservierungen.filter(r => r.angebot.mieterId === appState.currentEmail);
+            if (offeneReservierungen.length > 0) {
+                document.getElementById('pending-section').style.display = 'block';
+                document.getElementById('pending-list').innerHTML = offeneReservierungen.map(r => `
+                    <div class="released-card" style="border-left: 4px solid #ca8a04;">
+                        <div class="court">${r.angebot.platz}</div>
+                        <div class="details">${r.angebot.datum} • ${r.angebot.uhrzeit}</div>
+                        <div class="status">Gebucht von: <strong>${r.spielerName}</strong></div>
+                        <div class="earn">Erwarteter Eingang: €${r.angebot.verkaufspreis.toFixed(2)}
+                            (${r.zahlungsart === 'paypal' ? 'PayPal' : 'Überweisung'})</div>
+                        <div class="status" style="font-size: 12px; color: #666;">Reservierung läuft ab: ${restfristText(r.reserviertAm)}</div>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <button class="action-btn" style="flex: 1;" onclick="confirmZahlungEingang('${r.id}')">✓ Zahlung erhalten</button>
+                            <button class="action-btn" style="flex: 1; background: #eee; color: #333;" onclick="reservierungAblehnen('${r.id}')">Stornieren</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('pending-section').style.display = 'none';
+            }
+
             const freigegebenStunden = appState.zweitmarktAngebote.filter(a => a.mieterId === appState.currentEmail);
             if (freigegebenStunden.length > 0) {
                 document.getElementById('released-section').style.display = 'block';
-                document.getElementById('released-list').innerHTML = freigegebenStunden.map(a => {
-                    const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
-                    return `
+                document.getElementById('released-list').innerHTML = freigegebenStunden.map(a => `
                         <div class="released-card">
                             <div class="court">${a.platz}</div>
                             <div class="details">${a.datum} • ${a.uhrzeit}</div>
                             <div class="earn">Du erhältst: €${a.verkaufspreis.toFixed(2)}</div>
-                            <div class="status">Spieler zahlt: €${spielerZahlt.toFixed(2)}</div>
+                            <div class="status">Wartet auf Buchung</div>
                         </div>
-                    `;
-                }).join('');
+                    `).join('');
             } else {
                 document.getElementById('released-section').style.display = 'none';
             }
@@ -925,6 +1012,35 @@
             renderMieterDashboard();
         }
 
+        // Nur Zahlungsarten anbieten, die im Profil auch hinterlegt sind
+        function zahlungsartenAuswahlHTML() {
+            const m = appState.currentUser;
+            const hatIban = m.zahlungsartenUeberweisung && m.ibanValue;
+            const hatPaypal = m.zahlungsartenPaypal && m.paypalEmail;
+
+            if (!hatIban && !hatPaypal) {
+                return `
+                    <div style="background: #fee2e2; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626; font-size: 13px;">
+                        Du hast noch keine Zahlungsdaten hinterlegt. Ergänze sie unter <strong>⚙️ Mein Profil</strong>, sonst kann dir niemand das Geld überweisen.
+                    </div>
+                `;
+            }
+
+            return `
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 13px;">Zahlungsarten akzeptieren:</p>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: ${hatIban ? 'pointer' : 'not-allowed'}; font-size: 13px; margin-bottom: 8px; opacity: ${hatIban ? '1' : '0.45'};">
+                        <input type="checkbox" id="zahlungsart-ueberweisung" ${hatIban ? 'checked' : 'disabled'} style="width: 16px; height: 16px;">
+                        <span>💳 Überweisung${hatIban ? '' : ' — keine IBAN im Profil'}</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: ${hatPaypal ? 'pointer' : 'not-allowed'}; font-size: 13px; opacity: ${hatPaypal ? '1' : '0.45'};">
+                        <input type="checkbox" id="zahlungsart-paypal" ${hatPaypal ? 'checked' : 'disabled'} style="width: 16px; height: 16px;">
+                        <span>🅿️ PayPal${hatPaypal ? '' : ' — kein PayPal im Profil'}</span>
+                    </label>
+                </div>
+            `;
+        }
+
         function openFreigabeModal(stundenId) {
             const s = appState.currentUser.abostunden.find(s => s.id === stundenId);
             document.getElementById('freigabe-title').textContent = `Stunde freigeben: ${s.platz}`;
@@ -933,12 +1049,11 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                     ${[50, 75].map(percent => {
                         const verkaufspreis = (s.originalMiete * percent) / 100;
-                        const vereinGebuehr = verkaufspreis * 0.1;
                         return `
                             <button class="price-option" onclick="handleFreigeben(${stundenId}, ${verkaufspreis}, false)">
-                                <h4>${percent}% Rabatt<br>€${verkaufspreis.toFixed(2)}</h4>
+                                <h4>${percent}% vom Preis<br>€${verkaufspreis.toFixed(2)}</h4>
                                 <div class="breakdown" style="font-size: 12px;">
-                                    <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                                    <p>Spieler zahlt: €${verkaufspreis.toFixed(2)}</p>
                                     <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
                                 </div>
                             </button>
@@ -951,17 +1066,7 @@
                         <span><strong>Auto-Preisanpassung:</strong> Preis sinkt bis zu 50% je näher zum Termin</span>
                     </label>
                 </div>
-                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
-                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 13px;">Zahlungsarten akzeptieren:</p>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
-                        <input type="checkbox" id="zahlungsart-ueberweisung" checked style="width: 16px; height: 16px; cursor: pointer;">
-                        <span>💳 Überweisung (kostenlos)</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="zahlungsart-paypal" checked style="width: 16px; height: 16px; cursor: pointer;">
-                        <span>🅿️ PayPal (Spieler zahlt Gebühren)</span>
-                    </label>
-                </div>
+                ${zahlungsartenAuswahlHTML()}
             `;
             document.getElementById('freigabe-modal').classList.remove('hidden');
         }
@@ -1009,12 +1114,11 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
                     ${[50, 75].map(percent => {
                         const verkaufspreis = (totalPrice * percent) / 100;
-                        const vereinGebuehr = verkaufspreis * 0.1;
                         return `
                             <button class="price-option" onclick="handleMultiFreigeben(${verkaufspreis})">
-                                <h4>${percent}% Rabatt<br>€${verkaufspreis.toFixed(2)}</h4>
+                                <h4>${percent}% vom Preis<br>€${verkaufspreis.toFixed(2)}</h4>
                                 <div class="breakdown" style="font-size: 12px;">
-                                    <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                                    <p>Spieler zahlt: €${verkaufspreis.toFixed(2)}</p>
                                     <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
                                 </div>
                             </button>
@@ -1027,17 +1131,7 @@
                         <span><strong>Auto-Preisanpassung:</strong> Preis sinkt bis zu 50% je näher zum Termin</span>
                     </label>
                 </div>
-                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
-                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 13px;">Zahlungsarten akzeptieren:</p>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
-                        <input type="checkbox" id="zahlungsart-ueberweisung" checked style="width: 16px; height: 16px; cursor: pointer;">
-                        <span>💳 Überweisung (kostenlos)</span>
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
-                        <input type="checkbox" id="zahlungsart-paypal" checked style="width: 16px; height: 16px; cursor: pointer;">
-                        <span>🅿️ PayPal (Spieler zahlt Gebühren)</span>
-                    </label>
-                </div>
+                ${zahlungsartenAuswahlHTML()}
             `;
             document.getElementById('freigabe-modal').classList.remove('hidden');
         }
@@ -1064,6 +1158,7 @@
                     originalMiete: stunde.originalMiete,
                     verkaufspreis: preisProStunde,
                     mieterId: appState.currentEmail,
+                    mieterName: appState.currentUser.name,
                     verfügbar: true,
                     autoReduzierung: autoReduzierungEnabled,
                     zahlungsartenUeberweisung: ueberweisungEnabled,
@@ -1085,29 +1180,46 @@
 
         function renderSpielerDashboard() {
             document.getElementById('spieler-name-display').textContent = appState.currentUser.name;
+            verfalleneReservierungenAufraeumen();
             
             const mineBookings = appState.confirmedListings.filter(b => b.spielerEmail === appState.spielerEmail);
             if (mineBookings.length > 0) {
                 document.getElementById('booked-section').style.display = 'block';
-                document.getElementById('booked-list').innerHTML = mineBookings.map(b => {
-                    const spielerZahlt = b.angebot.verkaufspreis + (b.angebot.verkaufspreis * 0.1);
-                    return `
+                document.getElementById('booked-list').innerHTML = mineBookings.map(b => `
                         <div class="booked-card">
                             <div class="court">${b.angebot.platz}</div>
                             <div class="details">${b.angebot.datum} • ${b.angebot.uhrzeit}</div>
                             <div class="seller">Von: ${b.angebot.mieterName}</div>
-                            <div class="price">€${spielerZahlt.toFixed(2)}</div>
+                            <div class="price">€${b.angebot.verkaufspreis.toFixed(2)}</div>
                         </div>
-                    `;
-                }).join('');
+                    `).join('');
             } else {
                 document.getElementById('booked-section').style.display = 'none';
             }
             
+            const meineReservierungen = appState.reservierungen.filter(r => r.spielerEmail === appState.spielerEmail);
+            const pendingBox = document.getElementById('spieler-pending');
+            if (meineReservierungen.length > 0) {
+                pendingBox.style.display = 'block';
+                pendingBox.innerHTML = `
+                    <h2><span class="section-icon">⏳</span> Warten auf Bestätigung</h2>
+                    ${meineReservierungen.map(r => `
+                        <div class="booked-card" style="border-left: 4px solid #ca8a04;">
+                            <div class="court">${r.angebot.platz}</div>
+                            <div class="details">${r.angebot.datum} • ${r.angebot.uhrzeit}</div>
+                            <div class="seller">Von: ${r.angebot.mieterName}</div>
+                            <div class="price">€${r.angebot.verkaufspreis.toFixed(2)}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 6px;">${r.angebot.mieterName} bestätigt den Zahlungseingang — ${restfristText(r.reserviertAm)}</div>
+                        </div>
+                    `).join('')}
+                `;
+            } else {
+                pendingBox.style.display = 'none';
+            }
+
             const list = document.getElementById('plaetze-list');
             list.innerHTML = appState.zweitmarktAngebote.length === 0 ? '<p style="color: #999; font-size: 13px;">Keine freien Plätze verfügbar</p>' :
                 appState.zweitmarktAngebote.map(a => {
-                    const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
                     const isSelected = appState.selectedAngebote?.find(s => s.id === a.id);
                     const paymentMethods = [];
                     if (a.zahlungsartenUeberweisung !== false) paymentMethods.push('Überweisung');
@@ -1124,14 +1236,14 @@
                             </div>
                             <div class="offer-price">
                                 <div class="offer-original">€${a.originalMiete}</div>
-                                <div class="offer-current">€${spielerZahlt.toFixed(2)}</div>
+                                <div class="offer-current">€${a.verkaufspreis.toFixed(2)}</div>
                             </div>
                         </div>
                     `;
                 }).join('');
             
             if (appState.selectedAngebote && appState.selectedAngebote.length > 0) {
-                const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
+                const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
                 list.innerHTML += `
                     <div class="info-banner" style="background: #fef3c7; border-left: 4px solid #ca8a04; margin-top: 12px; text-align: center;">
                         <strong>${appState.selectedAngebote.length} Stunde(n) ausgewählt</strong><br>
@@ -1169,11 +1281,6 @@
             }
             
             const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
-            const vereinGebuehr = mietbetrag * 0.1;
-            const paypalGebuehr = mietbetrag * 0.0249 + 0.35; // 2,49% + €0,35
-            
-            const betragUeberweisung = mietbetrag + vereinGebuehr;
-            const betragPaypal = mietbetrag + vereinGebuehr + paypalGebuehr;
             
             document.getElementById('buchung-info').innerHTML = angebote.map(a => `<strong>${a.platz}</strong> • ${a.datum} ${a.uhrzeit}`).join('<br>');
             
@@ -1186,7 +1293,7 @@
                 zahlungsartHTML += `
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
                         <input type="radio" name="payment-method" value="iban" checked style="cursor: pointer;">
-                        <span style="font-size: 13px;">💳 Überweisung: <strong>€${betragUeberweisung.toFixed(2)}</strong></span>
+                        <span style="font-size: 13px;">💳 Überweisung</span>
                     </label>
                 `;
             }
@@ -1195,7 +1302,7 @@
                 zahlungsartHTML += `
                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         <input type="radio" name="payment-method" value="paypal" ${!alleUeberweisungEnabled ? 'checked' : ''} style="cursor: pointer;">
-                        <span style="font-size: 13px;">🅿️ PayPal: <strong>€${betragPaypal.toFixed(2)}</strong> (inkl. Gebühren)</span>
+                        <span style="font-size: 13px;">🅿️ PayPal</span>
                     </label>
                 `;
             }
@@ -1204,30 +1311,10 @@
             
             document.getElementById('buchung-price').innerHTML = zahlungsartHTML + `
                 <div class="modal-price">
-                    <div class="label">Mietbetrag</div>
+                    <div class="label">Zu zahlen an ${angebote[0].mieterName}</div>
                     <div class="amount">€${mietbetrag.toFixed(2)}</div>
                 </div>
-                <div class="modal-price" style="font-size: 12px; color: #666;">
-                    <div class="label">+ Z88 Fee (10%)</div>
-                    <div class="amount">€${vereinGebuehr.toFixed(2)}</div>
-                </div>
-                <div id="paypal-gebuehr-display" style="display: ${allePaypalEnabled ? 'flex' : 'none'}; font-size: 12px; color: #666; padding: 8px 0; border-top: 1px solid #ddd; margin-top: 8px; justify-content: space-between;">
-                    <div class="label">+ PayPal-Gebühren</div>
-                    <div class="amount">€${paypalGebuehr.toFixed(2)}</div>
-                </div>
             `;
-            
-            // Event Listener für Zahlungsart-Wechsel
-            document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const paypalGebührDisplay = document.getElementById('paypal-gebuehr-display');
-                    if (this.value === 'paypal') {
-                        paypalGebührDisplay.style.display = 'flex';
-                    } else {
-                        paypalGebührDisplay.style.display = 'none';
-                    }
-                });
-            });
             
             document.getElementById('buchung-modal').classList.remove('hidden');
         }
@@ -1238,103 +1325,133 @@
 
         function openPaymentModal() {
             const angebote = appState.selectedAngebote || [];
-            const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
-            const vereinGebuehr = mietbetrag * 0.1;
-            const paypalGebuehr = mietbetrag * 0.0249 + 0.35;
-            const betragUeberweisung = mietbetrag + vereinGebuehr;
-            const betragPaypal = mietbetrag + vereinGebuehr + paypalGebuehr;
-            
+            const betrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
             const selectedMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'iban';
-            
-            let contentHTML = '';
-            
+            const mieter = appState.mieterDB[angebote[0].mieterId] || {};
+            const verwendungszweck = `Z88 Zweitmarkt ${angebote[0].datum} ${angebote[0].uhrzeit}`;
+
+            let contentHTML = `
+                <div class="modal-price">
+                    <div class="label">Zu zahlen an ${mieter.name || 'Mieter'}</div>
+                    <div class="amount">€${betrag.toFixed(2)}</div>
+                </div>
+            `;
+
             if (selectedMethod === 'iban') {
-                contentHTML = `
-                    <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${betragUeberweisung.toFixed(2)}</div></div>
+                contentHTML += `
                     <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; border: 1px solid #4caf50; margin-bottom: 16px;">
-                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #1b5e20;">Bankverbindung:</p>
-                        <div style="font-size: 13px; line-height: 1.8; color: #333;">
-                            <p style="margin: 0;"><strong>Z88 Tennisverein Zehlendorf</strong></p>
-                            <p style="margin: 8px 0 0 0; font-family: monospace;">DE89 3704 0044 0532 0130 00</p>
-                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Bitte überweise diesen Betrag und referenziere deine Buchung!</p>
+                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #1b5e20;">Überweisung an:</p>
+                        <div style="font-size: 13px; line-height: 1.7; color: #333;">
+                            <p style="margin: 0;"><strong>${mieter.name || ''}</strong></p>
+                            <p style="margin: 6px 0 0 0; font-family: monospace; word-break: break-all;">${formatIban(mieter.ibanValue)}</p>
+                            ${mieter.bicValue ? `<p style="margin: 4px 0 0 0; font-family: monospace; font-size: 12px; color: #666;">BIC: ${mieter.bicValue}</p>` : ''}
+                            <p style="margin: 8px 0 0 0; font-size: 12px;">Verwendungszweck:<br><strong>${verwendungszweck}</strong></p>
                         </div>
+                        <div id="epc-qr" style="margin-top: 14px; text-align: center;"></div>
+                        <p style="margin: 8px 0 0 0; font-size: 11px; color: #666; text-align: center;">QR-Code mit deiner Banking-App scannen</p>
                     </div>
                 `;
             } else {
-                contentHTML = `
-                    <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${betragPaypal.toFixed(2)}</div></div>
+                const paypalLink = buildPaypalLink(mieter.paypalEmail, betrag);
+                contentHTML += `
                     <div style="background: #e3f2fd; padding: 16px; border-radius: 8px; border: 1px solid #2196f3; margin-bottom: 16px;">
-                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #0d47a1;">PayPal-Zahlung:</p>
-                        <div style="font-size: 13px; line-height: 1.8; color: #333;">
-                            <p style="margin: 0;">Du wirst zu PayPal weitergeleitet.</p>
-                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Betrag inkl. PayPal-Gebühren: €${betragPaypal.toFixed(2)}</p>
+                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #0d47a1;">PayPal-Zahlung an:</p>
+                        <div style="font-size: 13px; line-height: 1.7; color: #333;">
+                            <p style="margin: 0;"><strong>${mieter.name || ''}</strong></p>
+                            <p style="margin: 6px 0 0 0; font-family: monospace; word-break: break-all;">${mieter.paypalEmail || ''}</p>
                         </div>
+                        ${paypalLink ? `<a href="${paypalLink}" target="_blank" rel="noopener" class="btn btn-primary" style="display: block; width: 100%; margin-top: 14px; text-align: center; text-decoration: none; box-sizing: border-box;">🅿️ PayPal öffnen (€${betrag.toFixed(2)})</a>` : `<p style="margin: 12px 0 0 0; font-size: 12px; color: #666;">Sende den Betrag in deiner PayPal-App an die obige Adresse.</p>`}
+                        <p style="margin: 10px 0 0 0; font-size: 11px; color: #666;">Je nach gewählter PayPal-Zahlungsart können Gebühren anfallen.</p>
                     </div>
                 `;
             }
-            
+
             contentHTML += `
-                <button class="btn btn-primary" style="width: 100%;" onclick="processPayment('${selectedMethod}', ${selectedMethod === 'iban' ? betragUeberweisung : betragPaypal})">Zahlung bestätigen</button>
+                <div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #ca8a04; margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
+                    Der Platz wird für dich <strong>reserviert</strong>, sobald du unten bestätigst.
+                    Sobald ${mieter.name || 'der Mieter'} den Zahlungseingang bestätigt, gehört die Stunde dir.
+                    Ohne Bestätigung verfällt die Reservierung nach 48 Stunden.
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="confirmPaymentAndBook()">Ich habe bezahlt</button>
                 <button class="btn btn-outline" style="width: 100%; margin-top: 12px; color: #000; border-color: #000;" onclick="closePaymentModal()">Abbrechen</button>
             `;
-            
-            document.getElementById('payment-step-title').textContent = 'Zahlungsbestätigung';
+
+            document.getElementById('payment-step-title').textContent = 'Zahlung';
             document.getElementById('payment-content').innerHTML = contentHTML;
             document.getElementById('payment-modal').classList.remove('hidden');
+
+            if (selectedMethod === 'iban') {
+                renderEpcQrCode(mieter, betrag, verwendungszweck);
+            }
         }
 
-        function processPayment(method, betrag) {
-            document.getElementById('payment-step-title').textContent = '⏳ Wird verarbeitet...';
-            document.getElementById('payment-content').innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <p style="font-size: 48px; margin-bottom: 12px;">⏳</p>
-                    <p style="font-size: 14px; color: #666;">Bitte warten...</p>
-                    <div style="margin-top: 16px; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
-                        <div style="height: 100%; background: #facc15; width: 0%; animation: progress 3s ease-in-out forwards;"></div>
-                    </div>
-                </div>
-                <style>@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }</style>
-            `;
-            setTimeout(() => showPaymentSuccess(method, betrag), 3500);
+        // IBAN in 4er-Blöcken darstellen (bessere Lesbarkeit beim Abtippen)
+        function formatIban(iban) {
+            if (!iban) return '';
+            return iban.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
         }
 
-        function showPaymentSuccess(method, betrag) {
-            document.getElementById('payment-step-title').textContent = '✅ Zahlung erfolgreich!';
-            document.getElementById('payment-content').innerHTML = `
-                <div class="modal-price"><div class="label">Betrag erhalten</div><div class="amount">€${betrag.toFixed(2)}</div></div>
-                <div class="modal-info">Zahlungsart: ${method === 'paypal' ? '🅿️ PayPal' : '🏦 Bankverbindung'}</div>
-                <button class="btn btn-primary" style="width: 100%;" onclick="confirmPaymentAndBook()">Buchung abschließen</button>
-            `;
+        // PayPal.me akzeptiert nur Handles, keine E-Mail-Adressen
+        function buildPaypalLink(paypalWert, betrag) {
+            if (!paypalWert || paypalWert.includes('@')) return null;
+            const handle = paypalWert.replace(/^.*paypal\.me\//i, '').replace(/^\//, '').trim();
+            if (!handle) return null;
+            return `https://paypal.me/${encodeURIComponent(handle)}/${betrag.toFixed(2)}EUR`;
+        }
+
+        // EPC-QR (Girocode) nach EPC069-12, Version 002
+        function renderEpcQrCode(mieter, betrag, verwendungszweck) {
+            const container = document.getElementById('epc-qr');
+            if (!container || typeof QRCode === 'undefined' || !mieter.ibanValue) {
+                if (container) container.remove();
+                return;
+            }
+            const payload = [
+                'BCD',
+                '002',
+                '1',
+                'SCT',
+                mieter.bicValue || '',
+                (mieter.name || '').substring(0, 70),
+                mieter.ibanValue.replace(/\s/g, ''),
+                'EUR' + betrag.toFixed(2),
+                '',
+                '',
+                verwendungszweck.substring(0, 140)
+            ].join('\n');
+            try {
+                new QRCode(container, { text: payload, width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+            } catch (e) {
+                container.remove();
+            }
         }
 
         function confirmPaymentAndBook() {
             const angebote = appState.selectedAngebote || [];
             const selectedMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'iban';
-            const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
-            const vereinGebuehr = mietbetrag * 0.1;
-            const totalBetrag = mietbetrag + vereinGebuehr;
-            
+            const gesamtBetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
+
             angebote.forEach(a => {
-                appState.confirmedListings.push({
+                appState.reservierungen.push({
                     id: Math.random().toString(36).substr(2, 9),
                     angebot: a,
                     spielerName: appState.currentUser.name,
                     spielerEmail: appState.spielerEmail,
-                    zahlungsart: selectedMethod
+                    zahlungsart: selectedMethod,
+                    reserviertAm: Date.now()
                 });
                 appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(x => x.id !== a.id);
             });
-            
+
             appState.selectedAngebote = [];
             document.getElementById('payment-modal').classList.add('hidden');
             document.getElementById('buchung-modal').classList.add('hidden');
-            
+
             const zahlungsartText = selectedMethod === 'paypal' ? '🅿️ PayPal' : '💳 Überweisung';
-            const emailHTML = `
+            document.getElementById('email-content').innerHTML = `
                 <div style="font-size: 14px; line-height: 1.6; color: #333;">
                     <p>Hallo ${appState.currentUser.name},</p>
-                    <p style="margin-top: 12px;">deine Buchung wurde erfolgreich bestätigt! 🎉</p>
-                    <p style="margin-top: 8px; font-size: 16px; font-weight: 700; color: #ca8a04;">Viel Spaß auf dem Platz! 🎾</p>
+                    <p style="margin-top: 12px;">deine Reservierung ist eingegangen. Sobald ${angebote[0].mieterName} den Zahlungseingang bestätigt, gehört die Stunde dir — du bekommst dann eine weitere E-Mail.</p>
                     <div style="background: #f8f9fa; padding: 14px; border-radius: 8px; margin-top: 16px;">
                         ${angebote.map(a => `
                             <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e5e7eb;">
@@ -1342,17 +1459,61 @@
                                 <p style="color: #666; font-size: 13px;">📅 ${a.datum}</p>
                                 <p style="color: #666; font-size: 13px;">⏰ ${a.uhrzeit}</p>
                                 <p style="color: #999; font-size: 12px;">Von: ${a.mieterName}</p>
-                                <p style="color: #ca8a04; font-weight: 600; margin-top: 6px;">€${(a.verkaufspreis + a.verkaufspreis * 0.1).toFixed(2)}</p>
+                                <p style="color: #ca8a04; font-weight: 600; margin-top: 6px;">€${a.verkaufspreis.toFixed(2)}</p>
                             </div>
                         `).join('')}
-                        <p style="margin-top: 12px; font-weight: 600;">Gesamtbetrag: €${totalBetrag.toFixed(2)}</p>
+                        <p style="margin-top: 12px; font-weight: 600;">Gesamtbetrag: €${gesamtBetrag.toFixed(2)}</p>
                         <p style="margin-top: 8px; font-size: 12px; color: #666;">Zahlungsart: ${zahlungsartText}</p>
                     </div>
+                    <p style="margin-top: 14px; font-size: 12px; color: #666;">Bleibt die Bestätigung aus, verfällt die Reservierung nach 48 Stunden und der Platz geht zurück in den Zweitmarkt.</p>
                 </div>
             `;
-            
-            document.getElementById('email-content').innerHTML = emailHTML;
             document.getElementById('email-modal').classList.remove('hidden');
+        }
+
+        // Reservierungen ohne Bestätigung verfallen nach 48h zurück in den Markt
+        const RESERVIERUNG_FRIST_MS = 48 * 60 * 60 * 1000;
+
+        function verfalleneReservierungenAufraeumen() {
+            const jetzt = Date.now();
+            const abgelaufen = appState.reservierungen.filter(r => jetzt - r.reserviertAm > RESERVIERUNG_FRIST_MS);
+            if (abgelaufen.length === 0) return;
+            abgelaufen.forEach(r => appState.zweitmarktAngebote.push(r.angebot));
+            appState.reservierungen = appState.reservierungen.filter(r => jetzt - r.reserviertAm <= RESERVIERUNG_FRIST_MS);
+        }
+
+        function restfristText(reserviertAm) {
+            const restMs = RESERVIERUNG_FRIST_MS - (Date.now() - reserviertAm);
+            if (restMs <= 0) return 'abgelaufen';
+            const stunden = Math.floor(restMs / (60 * 60 * 1000));
+            if (stunden >= 1) return `noch ${stunden} Std.`;
+            return `noch ${Math.max(1, Math.floor(restMs / (60 * 1000)))} Min.`;
+        }
+
+        function confirmZahlungEingang(reservierungId) {
+            const r = appState.reservierungen.find(x => x.id === reservierungId);
+            if (!r) return;
+            if (!confirm(`Bestätigen, dass €${r.angebot.verkaufspreis.toFixed(2)} von ${r.spielerName} eingegangen sind?`)) return;
+
+            appState.confirmedListings.push({
+                id: r.id,
+                angebot: r.angebot,
+                spielerName: r.spielerName,
+                spielerEmail: r.spielerEmail,
+                zahlungsart: r.zahlungsart
+            });
+            appState.reservierungen = appState.reservierungen.filter(x => x.id !== reservierungId);
+            renderMieterDashboard();
+        }
+
+        function reservierungAblehnen(reservierungId) {
+            const r = appState.reservierungen.find(x => x.id === reservierungId);
+            if (!r) return;
+            if (!confirm('Reservierung stornieren? Die Stunde geht zurück in den Zweitmarkt.')) return;
+
+            appState.zweitmarktAngebote.push(r.angebot);
+            appState.reservierungen = appState.reservierungen.filter(x => x.id !== reservierungId);
+            renderMieterDashboard();
         }
 
         function closeEmailModal() {
@@ -1364,30 +1525,16 @@
             document.getElementById('payment-modal').classList.add('hidden');
         }
 
-        function updateRegPaymentInput() {
-            const typ = document.getElementById('reg-zahlungsart').value;
-            const label = document.getElementById('reg-payment-label');
-            const input = document.getElementById('reg-zahlungswert');
-            if (typ === 'paypal') {
-                label.textContent = 'PayPal Email';
-                input.placeholder = 'name@paypal.com';
-            } else {
-                label.textContent = 'IBAN';
-                input.placeholder = 'DE89370400440532013000';
-            }
+        function toggleProfilPayPalField() {
+            const checkbox = document.getElementById('profil-paypal-checkbox').checked;
+            const field = document.getElementById('profil-paypal-field');
+            field.style.display = checkbox ? 'block' : 'none';
         }
 
-        function updateProfilPaymentInput() {
-            const typ = document.getElementById('profil-zahlungsart').value;
-            const label = document.getElementById('profil-payment-label');
-            const input = document.getElementById('profil-zahlungswert');
-            if (typ === 'paypal') {
-                label.textContent = 'PayPal Email';
-                input.placeholder = 'name@paypal.com';
-            } else {
-                label.textContent = 'IBAN';
-                input.placeholder = 'DE89370400440532013000';
-            }
+        function toggleProfilIbanField() {
+            const checkbox = document.getElementById('profil-iban-checkbox').checked;
+            const field = document.getElementById('profil-iban-field');
+            field.style.display = checkbox ? 'block' : 'none';
         }
 
         function loadProfilData() {
@@ -1395,15 +1542,23 @@
             document.getElementById('profil-name').value = mieter.name || '';
             document.getElementById('profil-email').value = mieter.email || '';
             document.getElementById('profil-mitgliedsnummer').value = mieter.mitgliedsnummer || '';
-            document.getElementById('profil-zahlungsart').value = mieter.zahlungsart || 'paypal';
-            document.getElementById('profil-zahlungswert').value = mieter.zahlungswert || '';
-            updateProfilPaymentInput();
+            document.getElementById('profil-paypal-checkbox').checked = mieter.zahlungsartenPaypal || false;
+            document.getElementById('profil-iban-checkbox').checked = mieter.zahlungsartenUeberweisung || false;
+            document.getElementById('profil-paypal-email').value = mieter.paypalEmail || '';
+            document.getElementById('profil-iban-value').value = mieter.ibanValue || '';
+            document.getElementById('profil-bic-value').value = mieter.bicValue || '';
+            
+            toggleProfilPayPalField();
+            toggleProfilIbanField();
         }
 
         function saveProfilChanges() {
             const name = document.getElementById('profil-name').value;
-            const zahlungsart = document.getElementById('profil-zahlungsart').value;
-            const zahlungswert = document.getElementById('profil-zahlungswert').value;
+            const paypalChecked = document.getElementById('profil-paypal-checkbox').checked;
+            const ibanChecked = document.getElementById('profil-iban-checkbox').checked;
+            const paypalEmail = document.getElementById('profil-paypal-email').value;
+            const ibanValue = document.getElementById('profil-iban-value').value;
+            const bicValue = document.getElementById('profil-bic-value').value;
             const passwortAlt = document.getElementById('profil-passwort-alt').value;
             const passwortNeu = document.getElementById('profil-passwort-neu').value;
             const passwortRepeat = document.getElementById('profil-passwort-repeat').value;
@@ -1413,8 +1568,16 @@
                 alert('Name erforderlich!');
                 return;
             }
-            if (!zahlungswert) {
-                alert('Zahlungsinformationen erforderlich!');
+            if (!paypalChecked && !ibanChecked) {
+                alert('Mindestens eine Zahlungsart erforderlich!');
+                return;
+            }
+            if (paypalChecked && !paypalEmail) {
+                alert('PayPal Email erforderlich wenn PayPal akzeptiert wird!');
+                return;
+            }
+            if (ibanChecked && !ibanValue) {
+                alert('IBAN erforderlich wenn Überweisung akzeptiert wird!');
                 return;
             }
 
@@ -1438,12 +1601,18 @@
 
             // Daten speichern
             appState.currentUser.name = name;
-            appState.currentUser.zahlungsart = zahlungsart;
-            appState.currentUser.zahlungswert = zahlungswert;
+            appState.currentUser.zahlungsartenPaypal = paypalChecked;
+            appState.currentUser.paypalEmail = paypalEmail;
+            appState.currentUser.zahlungsartenUeberweisung = ibanChecked;
+            appState.currentUser.ibanValue = ibanValue;
+            appState.currentUser.bicValue = bicValue;
 
             appState.mieterDB[appState.currentEmail].name = name;
-            appState.mieterDB[appState.currentEmail].zahlungsart = zahlungsart;
-            appState.mieterDB[appState.currentEmail].zahlungswert = zahlungswert;
+            appState.mieterDB[appState.currentEmail].zahlungsartenPaypal = paypalChecked;
+            appState.mieterDB[appState.currentEmail].paypalEmail = paypalEmail;
+            appState.mieterDB[appState.currentEmail].zahlungsartenUeberweisung = ibanChecked;
+            appState.mieterDB[appState.currentEmail].ibanValue = ibanValue;
+            appState.mieterDB[appState.currentEmail].bicValue = bicValue;
 
             // Felder leeren
             document.getElementById('profil-passwort-alt').value = '';
