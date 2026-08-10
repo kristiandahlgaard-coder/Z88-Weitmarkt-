@@ -138,8 +138,184 @@
     </style>
 </head>
 <body>
+    <!-- WELCOME SCREEN - BOOKING TABLE 1:1 LAYOUT -->
+    <div id="welcome-screen" class="screen active" style="background: white; display: flex; flex-direction: column;">
+        
+        <!-- TAB HEADER -->
+        <div style="background: #666; display: flex; height: 40px;">
+            <button class="tab-btn" style="flex: 1; background: #888; color: white; font-weight: bold; border: none; cursor: pointer; font-size: 14px;">Reservierung</button>
+            <button class="tab-btn" style="flex: 1; background: #999; color: white; font-weight: bold; border: none; cursor: pointer; font-size: 14px; border-left: 1px solid #555; border-right: 1px solid #555;" onclick="goToScreen('initial-login')">🎾 Zweitmarkt</button>
+            <button class="tab-btn" style="flex: 1; background: #888; color: white; font-weight: bold; border: none; cursor: pointer; font-size: 14px;">Stornieren</button>
+        </div>
+        
+        <!-- DATE NAVIGATION -->
+        <div style="background: #ccc; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; height: 35px;">
+            <button style="background: #bbb; color: #666; border: 1px solid #999; padding: 4px 12px; cursor: pointer; font-weight: bold;">«« <</button>
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; justify-content: center; font-size: 13px; color: #333;">
+                <span id="date-display" style="font-weight: bold;">Samstag 5 Oktober 2026</span>
+                <span style="cursor: pointer; color: #0066cc;">Anderen Tag Wählen</span>
+                <span>⬇</span>
+            </div>
+            <button style="background: #bbb; color: #666; border: 1px solid #999; padding: 4px 12px; cursor: pointer; font-weight: bold;">> »»</button>
+        </div>
+        
+        <!-- BOOKING TABLE -->
+        <div style="flex: 1; overflow: auto; -webkit-overflow-scrolling: touch;">
+            <table style="width: 100%; border-collapse: collapse; background: white; font-size: 11px; font-family: Arial, sans-serif;">
+                <!-- TABLE HEADER -->
+                <tr style="height: 30px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold; width: 50px;"></td>
+                    <td style="background: #999; color: white; border: 1px solid #666; padding: 4px; text-align: center; font-weight: bold; min-width: 70px;">Platz 1</td>
+                    <td style="background: #999; color: white; border: 1px solid #666; padding: 4px; text-align: center; font-weight: bold; min-width: 70px;">Platz 2</td>
+                    <td style="background: #999; color: white; border: 1px solid #666; padding: 4px; text-align: center; font-weight: bold; min-width: 70px;">Platz 3</td>
+                    <td style="background: #999; color: white; border: 1px solid #666; padding: 4px; text-align: center; font-weight: bold; min-width: 70px;">Platz 4</td>
+                </tr>
+                
+                <!-- 07:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">07:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>7.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>7.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>7.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>7.00 Uhr<br><strong>€22</strong></td>
+                </tr>
+                
+                <!-- 08:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">08:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>8.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>8.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>8.00 Uhr<br><strong>€22</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>8.00 Uhr<br><strong>€22</strong></td>
+                </tr>
+                
+                <!-- 09:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">09:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>9.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>9.00 Uhr<br><strong>€24</strong></td>
+                </tr>
+                
+                <!-- 10:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">10:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>10.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+                
+                <!-- 11:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">11:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>11.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>11.00 Uhr<br><strong>€24</strong></td>
+                </tr>
+                
+                <!-- 12:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">12:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>12.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+                
+                <!-- 13:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">13:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>13.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>13.00 Uhr<br><strong>€24</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+                
+                <!-- 14:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">14:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>14.00 Uhr<br><strong>€24</strong></td>
+                </tr>
+                
+                <!-- 15:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">15:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>15.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>15.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>15.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>15.00 Uhr<br><strong>€26</strong></td>
+                </tr>
+                
+                <!-- 16:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">16:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>16.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>16.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>16.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>16.00 Uhr<br><strong>€26</strong></td>
+                </tr>
+                
+                <!-- 17:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">17:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>17.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>17.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>17.00 Uhr<br><strong>€26</strong></td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>17.00 Uhr<br><strong>€26</strong></td>
+                </tr>
+                
+                <!-- 18:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">18:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>18.00 Uhr<br><strong>€28</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+                
+                <!-- 19:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">19:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 2</strong><br>19.00 Uhr<br><strong>€28</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+                
+                <!-- 20:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">20:00</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 1</strong><br>20.00 Uhr<br><strong>€28</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 4</strong><br>20.00 Uhr<br><strong>€28</strong></td>
+                </tr>
+                
+                <!-- 21:00 -->
+                <tr style="height: 35px;">
+                    <td style="background: #f4d03f; border: 1px solid #999; padding: 4px; text-align: center; font-weight: bold;">21:00</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                    <td style="background: #90ee90; border: 1px solid #999; padding: 4px; text-align: center; font-size: 10px;"><strong>Platz 3</strong><br>21.00 Uhr<br><strong>€28</strong></td>
+                    <td style="background: #ccc; border: 1px solid #999; padding: 4px; text-align: center; color: #666; font-size: 10px;">Reserviert</td>
+                </tr>
+            </table>
+        </div>
+        <!-- FOOTER -->
+        <div style="background: #f0f0f0; border-top: 1px solid #ccc; padding: 8px 12px; font-size: 11px; color: #666;">
+            Dateiversion: 08.08.2026 08:45:56
+        </div>
+        
+    </div>
+
     <!-- INITIAL LOGIN -->
-    <div id="initial-login" class="screen login-style login-screen active">
+    <div id="initial-login" class="screen login-style login-screen">
         <div class="login-card">
             <h1>Z88</h1>
             <p class="tagline">ZWEITMARKT</p>
@@ -160,27 +336,66 @@
             <div class="login-form">
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" id="mieter-email" placeholder="max.mueller@example.de">
+                    <input type="email" id="mieter-login-email" placeholder="max.mueller@example.de">
                 </div>
                 <div class="form-group">
-                    <label>Mitgliedsnummer</label>
-                    <input type="text" id="mieter-number" placeholder="2024001">
-                </div>
-                <div class="form-group">
-                    <label>Zahlungsart</label>
-                    <select id="zahlungsart-typ" onchange="updatePaymentInput()">
-                        <option value="paypal">PayPal</option>
-                        <option value="iban">Bankverbindung (IBAN)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label id="payment-label">PayPal Email</label>
-                    <input type="text" id="zahlungsart-wert" placeholder="name@paypal.com">
+                    <label>Passwort</label>
+                    <input type="password" id="mieter-login-passwort" placeholder="••••••••">
                 </div>
             </div>
             <div class="button-group">
                 <button class="btn btn-primary" onclick="handleMieterLogin()">Anmelden</button>
                 <button class="btn btn-secondary" onclick="fillDemoData()">Demo-Daten (Max)</button>
+                <button class="btn btn-outline" style="font-size: 12px;" onclick="goToScreen('mieter-registrierung')">Noch kein Konto? Registrieren</button>
+                <button class="btn btn-outline" onclick="goToScreen('initial-login')">← Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MIETER REGISTRIERUNG -->
+    <div id="mieter-registrierung" class="screen login-style login-screen">
+        <div class="login-card">
+            <h1 style="font-size: 36px;">Registrierung</h1>
+            <p class="tagline">Abonnent</p>
+            <p class="desc">Erstelle dein Konto</p>
+            <div class="login-form" style="max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="max.mueller@example.de">
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="reg-name" placeholder="Max Müller">
+                </div>
+                <div class="form-group">
+                    <label>Mitgliedsnummer</label>
+                    <input type="text" id="reg-mitgliedsnummer" placeholder="2024001">
+                </div>
+                <div class="form-group">
+                    <label>Passwort</label>
+                    <input type="password" id="reg-passwort" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Passwort wiederholen</label>
+                    <input type="password" id="reg-passwort-repeat" placeholder="••••••••">
+                </div>
+                <hr style="margin: 16px 0; border: none; border-top: 1px solid #ddd;">
+                <p style="font-weight: bold; margin-bottom: 12px;">Zahlungsinformationen</p>
+                <div class="form-group">
+                    <label>Zahlungsart</label>
+                    <select id="reg-zahlungsart" onchange="updateRegPaymentInput()">
+                        <option value="paypal">🅿️ PayPal</option>
+                        <option value="iban">💳 Bankverbindung (IBAN)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="reg-payment-label">PayPal Email</label>
+                    <input type="text" id="reg-zahlungswert" placeholder="name@paypal.com">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="handleMieterRegistrierung()">Registrieren</button>
+                <button class="btn btn-outline" style="font-size: 12px;" onclick="goToScreen('mieter-login')">Bereits registriert? Anmelden</button>
                 <button class="btn btn-outline" onclick="goToScreen('initial-login')">← Zurück</button>
             </div>
         </div>
@@ -218,7 +433,10 @@
                     <h1>Mein Platzabo</h1>
                     <div class="user-info" id="mieter-name-display">Max Müller</div>
                 </div>
-                <button class="logout-btn" onclick="logout()">🚪 Abmelden</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="logout-btn" style="padding: 8px 12px;" onclick="goToScreen('mieter-profil')">⚙️</button>
+                    <button class="logout-btn" onclick="logout()">🚪 Abmelden</button>
+                </div>
             </div>
         </div>
         <div class="dashboard-content">
@@ -279,6 +497,80 @@
         </div>
     </div>
 
+    <!-- MIETER PROFIL -->
+    <div id="mieter-profil" class="screen dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div>
+                    <h1>Mein Profil</h1>
+                    <div class="user-info">Einstellungen</div>
+                </div>
+                <button class="logout-btn" onclick="goToScreen('mieter-dashboard')">← Zurück</button>
+            </div>
+        </div>
+        <div class="dashboard-content">
+            <div class="dashboard-main">
+                <div class="section">
+                    <h2>Persönliche Daten</h2>
+                    <div class="login-form">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="profil-name" placeholder="Max Müller">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="profil-email" placeholder="max.mueller@example.de" disabled style="background: #f0f0f0; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Mitgliedsnummer</label>
+                            <input type="text" id="profil-mitgliedsnummer" placeholder="2024001" disabled style="background: #f0f0f0; cursor: not-allowed;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Zahlungsinformationen</h2>
+                    <div class="login-form">
+                        <div class="form-group">
+                            <label>Zahlungsart</label>
+                            <select id="profil-zahlungsart" onchange="updateProfilPaymentInput()">
+                                <option value="paypal">🅿️ PayPal</option>
+                                <option value="iban">💳 Bankverbindung (IBAN)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="profil-payment-label">PayPal Email</label>
+                            <input type="text" id="profil-zahlungswert" placeholder="name@paypal.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Sicherheit</h2>
+                    <div class="login-form">
+                        <div class="form-group">
+                            <label>Passwort ändern</label>
+                            <input type="password" id="profil-passwort-alt" placeholder="Altes Passwort">
+                        </div>
+                        <div class="form-group">
+                            <label>Neues Passwort</label>
+                            <input type="password" id="profil-passwort-neu" placeholder="Neues Passwort">
+                        </div>
+                        <div class="form-group">
+                            <label>Passwort wiederholen</label>
+                            <input type="password" id="profil-passwort-repeat" placeholder="Passwort wiederholen">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group" style="margin-top: 24px;">
+                    <button class="btn btn-primary" onclick="saveProfilChanges()">💾 Änderungen speichern</button>
+                    <button class="btn btn-outline" onclick="goToScreen('mieter-dashboard')">Abbrechen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALS -->
     <div id="freigabe-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeFreigabeModal()">
         <div class="modal" onclick="event.stopPropagation()">
@@ -329,7 +621,11 @@
             mieterDB: {
                 'max.mueller@example.de': {
                     name: 'Max Müller',
-                    zahlungsarten: [{ typ: 'paypal', wert: 'max.mueller@paypal.com' }],
+                    mitgliedsnummer: '2024001',
+                    passwort: 'test1234',
+                    email: 'max.mueller@example.de',
+                    zahlungsart: 'paypal',
+                    zahlungswert: 'max.mueller@paypal.com',
                     abostunden: generateAbostunden(),
                 },
             },
@@ -368,36 +664,25 @@
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById(screen)?.classList.add('active');
             appState.currentScreen = screen;
+            
+            // Profil-Daten laden wenn Profil-Screen geöffnet wird
+            if (screen === 'mieter-profil') {
+                loadProfilData();
+            }
         }
 
         function fillDemoData() {
-            document.getElementById('mieter-email').value = 'max.mueller@example.de';
-            document.getElementById('mieter-number').value = '2024001';
-            document.getElementById('zahlungsart-typ').value = 'paypal';
-            document.getElementById('zahlungsart-wert').value = 'max.mueller@paypal.com';
-            updatePaymentInput();
-            
-            if (appState.confirmedListings.length === 0) {
-                appState.confirmedListings = [
-                    { id: 'demo1', angebot: { id: Math.random(), platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Anna Schmidt', spielerEmail: 'anna.schmidt@example.de' },
-                    { id: 'demo2', angebot: { id: Math.random(), platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 16.80, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Thomas König', spielerEmail: 'thomas.koenig@example.de' },
-                    { id: 'demo3', angebot: { id: Math.random(), platz: 'Platz 1', datum: '21.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' }, spielerName: 'Julia Werner', spielerEmail: 'julia.werner@example.de' },
-                ];
-            }
-            
-            appState.currentUser = { ...appState.mieterDB['max.mueller@example.de'] };
-            appState.currentEmail = 'max.mueller@example.de';
-            appState.currentMonthOffset = 0;
-            renderMieterDashboard();
-            goToScreen('mieter-dashboard');
+            document.getElementById('mieter-login-email').value = 'max.mueller@example.de';
+            document.getElementById('mieter-login-passwort').value = 'test1234';
+            handleMieterLogin();
         }
 
         function fillSpielerDemoData() {
             if (appState.zweitmarktAngebote.length === 0) {
                 appState.zweitmarktAngebote = [
-                    { id: Math.random(), platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
-                    { id: Math.random(), platz: 'Platz 1', datum: '28.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 16.80, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
-                    { id: Math.random(), platz: 'Platz 2', datum: '04.11.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' },
+                    { id: Math.random(), platz: 'Platz 1', datum: '07.10.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller', zahlungsartenUeberweisung: true, zahlungsartenPaypal: true },
+                    { id: Math.random(), platz: 'Platz 1', datum: '28.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 16.80, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller', zahlungsartenUeberweisung: true, zahlungsartenPaypal: true },
+                    { id: Math.random(), platz: 'Platz 2', datum: '04.11.2026', uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller', zahlungsartenUeberweisung: true, zahlungsartenPaypal: false },
                 ];
             }
             
@@ -409,17 +694,81 @@
         }
 
         function handleMieterLogin() {
-            const email = document.getElementById('mieter-email').value;
-            const number = document.getElementById('mieter-number').value;
-            if (email === 'max.mueller@example.de' && number === '2024001') {
-                appState.currentUser = { ...appState.mieterDB[email] };
+            const email = document.getElementById('mieter-login-email').value;
+            const passwort = document.getElementById('mieter-login-passwort').value;
+            
+            if (!email || !passwort) {
+                alert('Email und Passwort erforderlich!');
+                return;
+            }
+            
+            const mieter = appState.mieterDB[email];
+            if (mieter && mieter.passwort === passwort) {
+                appState.currentUser = { ...mieter };
                 appState.currentEmail = email;
                 appState.currentMonthOffset = 0;
+                document.getElementById('mieter-login-email').value = '';
+                document.getElementById('mieter-login-passwort').value = '';
                 renderMieterDashboard();
                 goToScreen('mieter-dashboard');
             } else {
-                alert('Email/Mitgliedsnummer falsch! Test: max.mueller@example.de / 2024001');
+                alert('Email oder Passwort falsch!');
             }
+        }
+
+        function handleMieterRegistrierung() {
+            const email = document.getElementById('reg-email').value;
+            const name = document.getElementById('reg-name').value;
+            const mitgliedsnummer = document.getElementById('reg-mitgliedsnummer').value;
+            const passwort = document.getElementById('reg-passwort').value;
+            const passwortRepeat = document.getElementById('reg-passwort-repeat').value;
+            const zahlungsart = document.getElementById('reg-zahlungsart').value;
+            const zahlungswert = document.getElementById('reg-zahlungswert').value;
+
+            // Validierung
+            if (!email || !name || !mitgliedsnummer || !passwort) {
+                alert('Alle Felder erforderlich!');
+                return;
+            }
+            if (passwort !== passwortRepeat) {
+                alert('Passwörter stimmen nicht überein!');
+                return;
+            }
+            if (appState.mieterDB[email]) {
+                alert('Diese Email existiert bereits!');
+                return;
+            }
+            if (!zahlungswert) {
+                alert('Zahlungsinformationen erforderlich!');
+                return;
+            }
+
+            // Neuen Mieter erstellen
+            appState.mieterDB[email] = {
+                name: name,
+                mitgliedsnummer: mitgliedsnummer,
+                passwort: passwort,
+                email: email,
+                zahlungsart: zahlungsart,
+                zahlungswert: zahlungswert,
+                abostunden: generateAbostunden(),
+            };
+
+            // Automatisch anmelden
+            appState.currentUser = { ...appState.mieterDB[email] };
+            appState.currentEmail = email;
+            appState.currentMonthOffset = 0;
+            
+            // Felder leeren
+            document.getElementById('reg-email').value = '';
+            document.getElementById('reg-name').value = '';
+            document.getElementById('reg-mitgliedsnummer').value = '';
+            document.getElementById('reg-passwort').value = '';
+            document.getElementById('reg-passwort-repeat').value = '';
+            document.getElementById('reg-zahlungswert').value = '';
+
+            renderMieterDashboard();
+            goToScreen('mieter-dashboard');
         }
 
         function handleSpielerLogin() {
@@ -437,7 +786,10 @@
         function renderMieterDashboard() {
             const mieter = appState.currentUser;
             document.getElementById('mieter-name-display').textContent = mieter.name;
-            const paymentInfo = mieter.zahlungsarten.map(z => `${z.typ === 'paypal' ? '🅿️ PayPal' : '🏦 IBAN'}: ${z.wert}`).join(' • ');
+            
+            // Zahlungsinfos anzeigen
+            const zahlungsartText = mieter.zahlungsart === 'paypal' ? '🅿️ PayPal' : '💳 IBAN';
+            const paymentInfo = `${zahlungsartText}: ${mieter.zahlungswert}`;
             document.getElementById('payment-info-display').innerHTML = paymentInfo;
             
             const startDate = new Date(2026, 9, 1);
@@ -544,23 +896,47 @@
             const s = appState.currentUser.abostunden.find(s => s.id === stundenId);
             document.getElementById('freigabe-title').textContent = `Stunde freigeben: ${s.platz}`;
             document.getElementById('freigabe-info').innerHTML = `${s.datum} • ${s.uhrzeit}<br>Original-Preis: <strong>€${s.originalMiete}</strong>`;
-            document.getElementById('freigabe-options').innerHTML = [50, 60].map(percent => {
-                const verkaufspreis = (s.originalMiete * percent) / 100;
-                const vereinGebuehr = verkaufspreis * 0.1;
-                return `
-                    <button class="price-option" onclick="handleFreigeben(${stundenId}, ${verkaufspreis})">
-                        <h4>${percent}% Rabatt = €${verkaufspreis.toFixed(2)}</h4>
-                        <div class="breakdown">
-                            <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
-                            <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
-                        </div>
-                    </button>
-                `;
-            }).join('');
+            document.getElementById('freigabe-options').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    ${[50, 75].map(percent => {
+                        const verkaufspreis = (s.originalMiete * percent) / 100;
+                        const vereinGebuehr = verkaufspreis * 0.1;
+                        return `
+                            <button class="price-option" onclick="handleFreigeben(${stundenId}, ${verkaufspreis}, false)">
+                                <h4>${percent}% Rabatt<br>€${verkaufspreis.toFixed(2)}</h4>
+                                <div class="breakdown" style="font-size: 12px;">
+                                    <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                                    <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
+                                </div>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                        <input type="checkbox" id="auto-reduzierung-checkbox" style="width: 16px; height: 16px; cursor: pointer;">
+                        <span><strong>Auto-Preisanpassung:</strong> Preis sinkt bis zu 50% je näher zum Termin</span>
+                    </label>
+                </div>
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 13px;">Zahlungsarten akzeptieren:</p>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
+                        <input type="checkbox" id="zahlungsart-ueberweisung" checked style="width: 16px; height: 16px; cursor: pointer;">
+                        <span>💳 Überweisung (kostenlos)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                        <input type="checkbox" id="zahlungsart-paypal" checked style="width: 16px; height: 16px; cursor: pointer;">
+                        <span>🅿️ PayPal (Spieler zahlt Gebühren)</span>
+                    </label>
+                </div>
+            `;
             document.getElementById('freigabe-modal').classList.remove('hidden');
         }
 
         function handleFreigeben(stundenId, verkaufspreis) {
+            const autoReduzierungEnabled = document.getElementById('auto-reduzierung-checkbox')?.checked || false;
+            const ueberweisungEnabled = document.getElementById('zahlungsart-ueberweisung')?.checked || false;
+            const paypalEnabled = document.getElementById('zahlungsart-paypal')?.checked || false;
             const stunde = appState.currentUser.abostunden.find(s => s.id === stundenId);
             appState.currentUser.abostunden = appState.currentUser.abostunden.filter(s => s.id !== stundenId);
             appState.zweitmarktAngebote.push({
@@ -572,6 +948,9 @@
                 verkaufspreis: verkaufspreis,
                 mieterId: appState.currentEmail,
                 mieterName: appState.currentUser.name,
+                autoReduzierung: autoReduzierungEnabled,
+                zahlungsartenUeberweisung: ueberweisungEnabled,
+                zahlungsartenPaypal: paypalEnabled
             });
             closeFreigabeModal();
             renderMieterDashboard();
@@ -593,25 +972,50 @@
                 <strong>Gesamt-Miete: €${totalPrice.toFixed(2)}</strong>
             `;
             
-            document.getElementById('freigabe-options').innerHTML = [50, 60].map(percent => {
-                const verkaufspreis = (totalPrice * percent) / 100;
-                const vereinGebuehr = verkaufspreis * 0.1;
-                return `
-                    <button class="price-option" onclick="handleMultiFreigeben(${verkaufspreis})">
-                        <h4>${percent}% Rabatt = €${verkaufspreis.toFixed(2)}</h4>
-                        <div class="breakdown">
-                            <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
-                            <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
-                        </div>
-                    </button>
-                `;
-            }).join('');
+            document.getElementById('freigabe-options').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    ${[50, 75].map(percent => {
+                        const verkaufspreis = (totalPrice * percent) / 100;
+                        const vereinGebuehr = verkaufspreis * 0.1;
+                        return `
+                            <button class="price-option" onclick="handleMultiFreigeben(${verkaufspreis})">
+                                <h4>${percent}% Rabatt<br>€${verkaufspreis.toFixed(2)}</h4>
+                                <div class="breakdown" style="font-size: 12px;">
+                                    <p>Spieler zahlt: €${(verkaufspreis + vereinGebuehr).toFixed(2)}</p>
+                                    <p>Du erhältst: €${verkaufspreis.toFixed(2)}</p>
+                                </div>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                        <input type="checkbox" id="auto-reduzierung-checkbox" style="width: 16px; height: 16px; cursor: pointer;">
+                        <span><strong>Auto-Preisanpassung:</strong> Preis sinkt bis zu 50% je näher zum Termin</span>
+                    </label>
+                </div>
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; border: 1px solid #ddd;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 13px;">Zahlungsarten akzeptieren:</p>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; margin-bottom: 8px;">
+                        <input type="checkbox" id="zahlungsart-ueberweisung" checked style="width: 16px; height: 16px; cursor: pointer;">
+                        <span>💳 Überweisung (kostenlos)</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px;">
+                        <input type="checkbox" id="zahlungsart-paypal" checked style="width: 16px; height: 16px; cursor: pointer;">
+                        <span>🅿️ PayPal (Spieler zahlt Gebühren)</span>
+                    </label>
+                </div>
+            `;
             document.getElementById('freigabe-modal').classList.remove('hidden');
         }
 
         function handleMultiFreigeben(verkaufspreis) {
             const selected = appState.selectedStunden || [];
             if (selected.length === 0) return;
+            
+            const autoReduzierungEnabled = document.getElementById('auto-reduzierung-checkbox')?.checked || false;
+            const ueberweisungEnabled = document.getElementById('zahlungsart-ueberweisung')?.checked || false;
+            const paypalEnabled = document.getElementById('zahlungsart-paypal')?.checked || false;
             
             // Preis pro Stunde berechnen
             const preisProStunde = verkaufspreis / selected.length;
@@ -627,9 +1031,13 @@
                     originalMiete: stunde.originalMiete,
                     verkaufspreis: preisProStunde,
                     mieterId: appState.currentEmail,
-                    verfügbar: true
+                    verfügbar: true,
+                    autoReduzierung: autoReduzierungEnabled,
+                    zahlungsartenUeberweisung: ueberweisungEnabled,
+                    zahlungsartenPaypal: paypalEnabled
                 });
             });
+
             
             // Auswahl löschen
             appState.selectedStunden = [];
@@ -668,6 +1076,10 @@
                 appState.zweitmarktAngebote.map(a => {
                     const spielerZahlt = a.verkaufspreis + (a.verkaufspreis * 0.1);
                     const isSelected = appState.selectedAngebote?.find(s => s.id === a.id);
+                    const paymentMethods = [];
+                    if (a.zahlungsartenUeberweisung !== false) paymentMethods.push('Überweisung');
+                    if (a.zahlungsartenPaypal !== false) paymentMethods.push('PayPal');
+                    const paymentInfo = paymentMethods.length > 0 ? paymentMethods.join(', ') : 'Keine Zahlungsart';
                     return `
                         <div class="offer-card ${isSelected ? 'selected' : ''}" onclick="toggleStundeSelection(${a.id})">
                             <input type="checkbox" class="offer-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation(); toggleStundeSelection(${a.id})">
@@ -675,6 +1087,7 @@
                                 <div class="offer-court">${a.platz}</div>
                                 <div class="offer-time">${a.datum} • ${a.uhrzeit}</div>
                                 <div class="offer-seller">Von: ${a.mieterName}</div>
+                                <div style="font-size: 11px; color: #666; margin-top: 4px;">💳 ${paymentInfo}</div>
                             </div>
                             <div class="offer-price">
                                 <div class="offer-original">€${a.originalMiete}</div>
@@ -710,9 +1123,79 @@
 
         function openMultiBookingModal() {
             if (!appState.selectedAngebote || appState.selectedAngebote.length === 0) return;
-            const totalBetrag = appState.selectedAngebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-            document.getElementById('buchung-info').innerHTML = appState.selectedAngebote.map(a => `<strong>${a.platz}</strong> • ${a.datum} ${a.uhrzeit}`).join('<br>');
-            document.getElementById('buchung-price').innerHTML = `<div class="label">Gesamtbetrag</div><div class="amount">€${totalBetrag.toFixed(2)}</div>`;
+            
+            // Zahlungsarten von allen Anbietern sammeln
+            const angebote = appState.selectedAngebote;
+            const alleUeberweisungEnabled = angebote.every(a => a.zahlungsartenUeberweisung !== false);
+            const allePaypalEnabled = angebote.every(a => a.zahlungsartenPaypal !== false);
+            
+            // Prüfe ob mindestens eine Zahlungsart akzeptiert wird
+            if (!alleUeberweisungEnabled && !allePaypalEnabled) {
+                alert('Leider können Sie diese Kombination nicht buchen - kein gemeinsamer Zahlungsweg verfügbar!');
+                return;
+            }
+            
+            const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
+            const vereinGebuehr = mietbetrag * 0.1;
+            const paypalGebuehr = mietbetrag * 0.0249 + 0.35; // 2,49% + €0,35
+            
+            const betragUeberweisung = mietbetrag + vereinGebuehr;
+            const betragPaypal = mietbetrag + vereinGebuehr + paypalGebuehr;
+            
+            document.getElementById('buchung-info').innerHTML = angebote.map(a => `<strong>${a.platz}</strong> • ${a.datum} ${a.uhrzeit}`).join('<br>');
+            
+            let zahlungsartHTML = `
+                <div style="background: #f0f0f0; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">Zahlungsart wählen:</p>
+            `;
+            
+            if (alleUeberweisungEnabled) {
+                zahlungsartHTML += `
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-bottom: 8px;">
+                        <input type="radio" name="payment-method" value="iban" checked style="cursor: pointer;">
+                        <span style="font-size: 13px;">💳 Überweisung: <strong>€${betragUeberweisung.toFixed(2)}</strong></span>
+                    </label>
+                `;
+            }
+            
+            if (allePaypalEnabled) {
+                zahlungsartHTML += `
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="radio" name="payment-method" value="paypal" ${!alleUeberweisungEnabled ? 'checked' : ''} style="cursor: pointer;">
+                        <span style="font-size: 13px;">🅿️ PayPal: <strong>€${betragPaypal.toFixed(2)}</strong> (inkl. Gebühren)</span>
+                    </label>
+                `;
+            }
+            
+            zahlungsartHTML += `</div>`;
+            
+            document.getElementById('buchung-price').innerHTML = zahlungsartHTML + `
+                <div class="modal-price">
+                    <div class="label">Mietbetrag</div>
+                    <div class="amount">€${mietbetrag.toFixed(2)}</div>
+                </div>
+                <div class="modal-price" style="font-size: 12px; color: #666;">
+                    <div class="label">+ Z88 Fee (10%)</div>
+                    <div class="amount">€${vereinGebuehr.toFixed(2)}</div>
+                </div>
+                <div id="paypal-gebuehr-display" style="display: ${allePaypalEnabled ? 'flex' : 'none'}; font-size: 12px; color: #666; padding: 8px 0; border-top: 1px solid #ddd; margin-top: 8px; justify-content: space-between;">
+                    <div class="label">+ PayPal-Gebühren</div>
+                    <div class="amount">€${paypalGebuehr.toFixed(2)}</div>
+                </div>
+            `;
+            
+            // Event Listener für Zahlungsart-Wechsel
+            document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const paypalGebührDisplay = document.getElementById('paypal-gebuehr-display');
+                    if (this.value === 'paypal') {
+                        paypalGebührDisplay.style.display = 'flex';
+                    } else {
+                        paypalGebührDisplay.style.display = 'none';
+                    }
+                });
+            });
+            
             document.getElementById('buchung-modal').classList.remove('hidden');
         }
 
@@ -722,14 +1205,48 @@
 
         function openPaymentModal() {
             const angebote = appState.selectedAngebote || [];
-            const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
-            document.getElementById('payment-step-title').textContent = 'Zahlungsart wählen';
-            document.getElementById('payment-content').innerHTML = `
-                <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${totalBetrag.toFixed(2)}</div></div>
-                <button class="price-option" onclick="processPayment('paypal', ${totalBetrag})"><h4>🅿️ PayPal</h4><div class="breakdown">Sichere Online-Zahlung</div></button>
-                <button class="price-option" onclick="processPayment('iban', ${totalBetrag})"><h4>🏦 Bankverbindung</h4><div class="breakdown">Direkte Banküberweisung</div></button>
+            const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
+            const vereinGebuehr = mietbetrag * 0.1;
+            const paypalGebuehr = mietbetrag * 0.0249 + 0.35;
+            const betragUeberweisung = mietbetrag + vereinGebuehr;
+            const betragPaypal = mietbetrag + vereinGebuehr + paypalGebuehr;
+            
+            const selectedMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'iban';
+            
+            let contentHTML = '';
+            
+            if (selectedMethod === 'iban') {
+                contentHTML = `
+                    <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${betragUeberweisung.toFixed(2)}</div></div>
+                    <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; border: 1px solid #4caf50; margin-bottom: 16px;">
+                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #1b5e20;">Bankverbindung:</p>
+                        <div style="font-size: 13px; line-height: 1.8; color: #333;">
+                            <p style="margin: 0;"><strong>Z88 Tennisverein Zehlendorf</strong></p>
+                            <p style="margin: 8px 0 0 0; font-family: monospace;">DE89 3704 0044 0532 0130 00</p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Bitte überweise diesen Betrag und referenziere deine Buchung!</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                contentHTML = `
+                    <div class="modal-price"><div class="label">Zahlbetrag</div><div class="amount">€${betragPaypal.toFixed(2)}</div></div>
+                    <div style="background: #e3f2fd; padding: 16px; border-radius: 8px; border: 1px solid #2196f3; margin-bottom: 16px;">
+                        <p style="margin: 0 0 12px 0; font-weight: bold; color: #0d47a1;">PayPal-Zahlung:</p>
+                        <div style="font-size: 13px; line-height: 1.8; color: #333;">
+                            <p style="margin: 0;">Du wirst zu PayPal weitergeleitet.</p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #666;">Betrag inkl. PayPal-Gebühren: €${betragPaypal.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            contentHTML += `
+                <button class="btn btn-primary" style="width: 100%;" onclick="processPayment('${selectedMethod}', ${selectedMethod === 'iban' ? betragUeberweisung : betragPaypal})">Zahlung bestätigen</button>
                 <button class="btn btn-outline" style="width: 100%; margin-top: 12px; color: #000; border-color: #000;" onclick="closePaymentModal()">Abbrechen</button>
             `;
+            
+            document.getElementById('payment-step-title').textContent = 'Zahlungsbestätigung';
+            document.getElementById('payment-content').innerHTML = contentHTML;
             document.getElementById('payment-modal').classList.remove('hidden');
         }
 
@@ -759,7 +1276,10 @@
 
         function confirmPaymentAndBook() {
             const angebote = appState.selectedAngebote || [];
-            const totalBetrag = angebote.reduce((sum, a) => sum + (a.verkaufspreis + a.verkaufspreis * 0.1), 0);
+            const selectedMethod = document.querySelector('input[name="payment-method"]:checked')?.value || 'iban';
+            const mietbetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
+            const vereinGebuehr = mietbetrag * 0.1;
+            const totalBetrag = mietbetrag + vereinGebuehr;
             
             angebote.forEach(a => {
                 appState.confirmedListings.push({
@@ -767,6 +1287,7 @@
                     angebot: a,
                     spielerName: appState.currentUser.name,
                     spielerEmail: appState.spielerEmail,
+                    zahlungsart: selectedMethod
                 });
                 appState.zweitmarktAngebote = appState.zweitmarktAngebote.filter(x => x.id !== a.id);
             });
@@ -775,6 +1296,7 @@
             document.getElementById('payment-modal').classList.add('hidden');
             document.getElementById('buchung-modal').classList.add('hidden');
             
+            const zahlungsartText = selectedMethod === 'paypal' ? '🅿️ PayPal' : '💳 Überweisung';
             const emailHTML = `
                 <div style="font-size: 14px; line-height: 1.6; color: #333;">
                     <p>Hallo ${appState.currentUser.name},</p>
@@ -791,6 +1313,7 @@
                             </div>
                         `).join('')}
                         <p style="margin-top: 12px; font-weight: 600;">Gesamtbetrag: €${totalBetrag.toFixed(2)}</p>
+                        <p style="margin-top: 8px; font-size: 12px; color: #666;">Zahlungsart: ${zahlungsartText}</p>
                     </div>
                 </div>
             `;
@@ -808,14 +1331,105 @@
             document.getElementById('payment-modal').classList.add('hidden');
         }
 
+        function updateRegPaymentInput() {
+            const typ = document.getElementById('reg-zahlungsart').value;
+            const label = document.getElementById('reg-payment-label');
+            const input = document.getElementById('reg-zahlungswert');
+            if (typ === 'paypal') {
+                label.textContent = 'PayPal Email';
+                input.placeholder = 'name@paypal.com';
+            } else {
+                label.textContent = 'IBAN';
+                input.placeholder = 'DE89370400440532013000';
+            }
+        }
+
+        function updateProfilPaymentInput() {
+            const typ = document.getElementById('profil-zahlungsart').value;
+            const label = document.getElementById('profil-payment-label');
+            const input = document.getElementById('profil-zahlungswert');
+            if (typ === 'paypal') {
+                label.textContent = 'PayPal Email';
+                input.placeholder = 'name@paypal.com';
+            } else {
+                label.textContent = 'IBAN';
+                input.placeholder = 'DE89370400440532013000';
+            }
+        }
+
+        function loadProfilData() {
+            const mieter = appState.currentUser;
+            document.getElementById('profil-name').value = mieter.name || '';
+            document.getElementById('profil-email').value = mieter.email || '';
+            document.getElementById('profil-mitgliedsnummer').value = mieter.mitgliedsnummer || '';
+            document.getElementById('profil-zahlungsart').value = mieter.zahlungsart || 'paypal';
+            document.getElementById('profil-zahlungswert').value = mieter.zahlungswert || '';
+            updateProfilPaymentInput();
+        }
+
+        function saveProfilChanges() {
+            const name = document.getElementById('profil-name').value;
+            const zahlungsart = document.getElementById('profil-zahlungsart').value;
+            const zahlungswert = document.getElementById('profil-zahlungswert').value;
+            const passwortAlt = document.getElementById('profil-passwort-alt').value;
+            const passwortNeu = document.getElementById('profil-passwort-neu').value;
+            const passwortRepeat = document.getElementById('profil-passwort-repeat').value;
+
+            // Validierung
+            if (!name) {
+                alert('Name erforderlich!');
+                return;
+            }
+            if (!zahlungswert) {
+                alert('Zahlungsinformationen erforderlich!');
+                return;
+            }
+
+            // Passwort ändern - optional
+            if (passwortNeu) {
+                if (!passwortAlt) {
+                    alert('Altes Passwort erforderlich zum Ändern!');
+                    return;
+                }
+                if (appState.currentUser.passwort !== passwortAlt) {
+                    alert('Altes Passwort falsch!');
+                    return;
+                }
+                if (passwortNeu !== passwortRepeat) {
+                    alert('Neue Passwörter stimmen nicht überein!');
+                    return;
+                }
+                appState.currentUser.passwort = passwortNeu;
+                appState.mieterDB[appState.currentEmail].passwort = passwortNeu;
+            }
+
+            // Daten speichern
+            appState.currentUser.name = name;
+            appState.currentUser.zahlungsart = zahlungsart;
+            appState.currentUser.zahlungswert = zahlungswert;
+
+            appState.mieterDB[appState.currentEmail].name = name;
+            appState.mieterDB[appState.currentEmail].zahlungsart = zahlungsart;
+            appState.mieterDB[appState.currentEmail].zahlungswert = zahlungswert;
+
+            // Felder leeren
+            document.getElementById('profil-passwort-alt').value = '';
+            document.getElementById('profil-passwort-neu').value = '';
+            document.getElementById('profil-passwort-repeat').value = '';
+
+            alert('Änderungen gespeichert!');
+            renderMieterDashboard();
+            goToScreen('mieter-dashboard');
+        }
+
         function logout() {
             appState.currentUser = null;
             appState.currentEmail = null;
             appState.spielerEmail = '';
             appState.selectedStunden = [];
             appState.selectedAngebote = [];
-            document.getElementById('mieter-email').value = '';
-            document.getElementById('mieter-number').value = '';
+            document.getElementById('mieter-login-email').value = '';
+            document.getElementById('mieter-login-passwort').value = '';
             document.getElementById('spieler-name').value = '';
             document.getElementById('spieler-email').value = '';
             goToScreen('initial-login');
