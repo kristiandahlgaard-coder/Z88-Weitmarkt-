@@ -309,8 +309,13 @@
             </table>
         </div>
         <!-- FOOTER -->
-        <div style="background: #f0f0f0; border-top: 1px solid #ccc; padding: 8px 12px; font-size: 11px; color: #666;">
-            Dateiversion: 08.08.2026 08:45:56
+        <div style="background: #f0f0f0; border-top: 1px solid #ccc; padding: 10px 12px; font-size: 11px; color: #666;">
+            <div style="margin-bottom: 6px;">
+                <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('impressum'); return false;" style="color: #555;">Impressum</a> ·
+                <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('datenschutz'); return false;" style="color: #555;">Datenschutz</a> ·
+                <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('nutzung'); return false;" style="color: #555;">Nutzungsbedingungen</a>
+            </div>
+            <div>Z88 Zweitmarkt — Testversion · Dateiversion: 08.08.2026 08:45:56</div>
         </div>
         
     </div>
@@ -486,7 +491,13 @@
                     <h2><span class="section-icon">✅</span> Verkaufte Stunden</h2>
                     <div id="sold-list"></div>
                 </div>
-            </div>
+            
+                <div style="margin-top: 28px; padding-top: 14px; border-top: 1px solid #333; font-size: 11px; color: #888; text-align: center;">
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('impressum'); return false;" style="color: #888;">Impressum</a> ·
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('datenschutz'); return false;" style="color: #888;">Datenschutz</a> ·
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('nutzung'); return false;" style="color: #888;">Nutzungsbedingungen</a>
+                </div>
+</div>
         </div>
     </div>
 
@@ -516,7 +527,13 @@
                     <h2><span class="section-icon">🎾</span> Verfügbare Plätze</h2>
                     <div id="plaetze-list"></div>
                 </div>
-            </div>
+            
+                <div style="margin-top: 28px; padding-top: 14px; border-top: 1px solid #333; font-size: 11px; color: #888; text-align: center;">
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('impressum'); return false;" style="color: #888;">Impressum</a> ·
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('datenschutz'); return false;" style="color: #888;">Datenschutz</a> ·
+                    <a href="#" onclick="goToScreen('rechtliches'); showRechtsteil('nutzung'); return false;" style="color: #888;">Nutzungsbedingungen</a>
+                </div>
+</div>
         </div>
     </div>
 
@@ -604,6 +621,118 @@
         </div>
     </div>
 
+    <!-- RECHTLICHES -->
+    <div id="rechtliches" class="screen dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div>
+                    <h1>Rechtliches</h1>
+                    <div class="user-info" id="rechts-untertitel">Impressum</div>
+                </div>
+                <button class="logout-btn" onclick="goToScreen('welcome-screen')">← Zurück</button>
+            </div>
+        </div>
+        <div class="dashboard-content">
+            <div class="dashboard-main">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 18px;">
+                    <button id="tab-impressum" class="btn btn-outline" style="font-size: 12px; padding: 8px 4px;" onclick="showRechtsteil('impressum')">Impressum</button>
+                    <button id="tab-datenschutz" class="btn btn-outline" style="font-size: 12px; padding: 8px 4px;" onclick="showRechtsteil('datenschutz')">Datenschutz</button>
+                    <button id="tab-nutzung" class="btn btn-outline" style="font-size: 12px; padding: 8px 4px;" onclick="showRechtsteil('nutzung')">Nutzung</button>
+                </div>
+
+                <div id="teil-impressum" style="display:none; font-size: 13px; line-height: 1.7; color: #333;">
+                    <p style="background: #fef3c7; padding: 10px; border-radius: 6px; border-left: 4px solid #ca8a04; font-size: 12px;">
+                        <strong>Hinweis:</strong> Diese Anwendung befindet sich in einer Testphase.
+                    </p>
+                    <h3 style="margin-top: 18px;">Angaben gemäß § 5 DDG</h3>
+                    <p>[Vorname Nachname]<br>[Straße und Hausnummer]<br>[PLZ Ort]</p>
+                    <h3 style="margin-top: 18px;">Kontakt</h3>
+                    <p>E-Mail: [E-Mail-Adresse]<br>Telefon: [optional]</p>
+                    <h3 style="margin-top: 18px;">Verantwortlich für den Inhalt</h3>
+                    <p>[Vorname Nachname], Anschrift wie oben</p>
+                    <h3 style="margin-top: 18px;">Verhältnis zum Zehlendorfer TSV von 1888 e.V.</h3>
+                    <p>Der Z88 Zweitmarkt wird eigenständig betrieben und ist kein Angebot des Zehlendorfer
+                    Turn- und Sportvereins von 1888 e.V. Der Verein stellt die Plätze zur Verfügung und
+                    gestattet die Nutzung, ist jedoch weder Betreiber dieser Anwendung noch Vertragspartei
+                    der zwischen Mitgliedern geschlossenen Vereinbarungen.</p>
+                    <h3 style="margin-top: 18px;">Streitschlichtung</h3>
+                    <p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer
+                    Verbraucherschlichtungsstelle teilzunehmen.</p>
+                </div>
+
+                <div id="teil-datenschutz" style="display:none; font-size: 13px; line-height: 1.7; color: #333;">
+                    <p style="background: #fef3c7; padding: 10px; border-radius: 6px; border-left: 4px solid #ca8a04; font-size: 12px;">
+                        <strong>Entwurf.</strong> Vor dem produktiven Einsatz fachlich zu prüfen.
+                    </p>
+                    <h3 style="margin-top: 18px;">Verantwortlicher</h3>
+                    <p>[Vorname Nachname], [Anschrift], [E-Mail]</p>
+                    <h3 style="margin-top: 18px;">Welche Daten verarbeitet werden</h3>
+                    <p><strong>Bei der Registrierung als Abonnent:</strong> Name, E-Mail-Adresse,
+                    Mitgliedsnummer, Passwort sowie die von Ihnen angegebenen Zahlungsdaten
+                    (IBAN und BIC bzw. PayPal-Name).</p>
+                    <p><strong>Bei der Buchung als Spieler:</strong> Name und E-Mail-Adresse.</p>
+                    <p><strong>Bei jeder Vermittlung:</strong> Platz, Datum, Uhrzeit, Preis und die
+                    beteiligten Personen.</p>
+                    <h3 style="margin-top: 18px;">Zweck und Rechtsgrundlage</h3>
+                    <p>Die Verarbeitung dient der Durchführung der Vermittlung und erfolgt auf Grundlage
+                    von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).</p>
+                    <h3 style="margin-top: 18px;">Weitergabe Ihrer Daten</h3>
+                    <p>Ihre Zahlungsdaten werden ausschließlich demjenigen Mitglied angezeigt, das eine
+                    von Ihnen freigegebene Stunde bucht — damit dieses den Betrag überweisen kann.
+                    Eine darüber hinausgehende Weitergabe an Dritte findet nicht statt. Insbesondere
+                    werden keine Daten an den Zehlendorfer TSV von 1888 e.V. übermittelt.</p>
+                    <h3 style="margin-top: 18px;">Speicherdauer</h3>
+                    <p>Ihre Daten werden gelöscht, sobald Ihr Konto gelöscht wird oder der Zweck der
+                    Verarbeitung entfällt.</p>
+                    <h3 style="margin-top: 18px;">Ihre Rechte</h3>
+                    <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der
+                    Verarbeitung, Datenübertragbarkeit und Widerspruch. Wenden Sie sich dazu an die
+                    oben genannte Adresse. Es besteht ein Beschwerderecht bei einer Aufsichtsbehörde.</p>
+                    <h3 style="margin-top: 18px;">Hosting</h3>
+                    <p>Die Anwendung wird bei [Anbieter] gehostet. Beim Aufruf werden technisch
+                    notwendige Verbindungsdaten verarbeitet.</p>
+                </div>
+
+                <div id="teil-nutzung" style="display:none; font-size: 13px; line-height: 1.7; color: #333;">
+                    <p style="background: #fef3c7; padding: 10px; border-radius: 6px; border-left: 4px solid #ca8a04; font-size: 12px;">
+                        <strong>Entwurf.</strong> Vor dem produktiven Einsatz fachlich zu prüfen.
+                    </p>
+                    <h3 style="margin-top: 18px;">1. Gegenstand</h3>
+                    <p>Der Z88 Zweitmarkt vermittelt die Weitergabe gebuchter, aber ungenutzter
+                    Platzstunden zwischen Mitgliedern. Die Anwendung stellt ausschließlich die
+                    technische Plattform bereit.</p>
+                    <h3 style="margin-top: 18px;">2. Vertragsverhältnis</h3>
+                    <p>Die Vereinbarung über die Weitergabe einer Stunde kommt <strong>unmittelbar
+                    zwischen den beteiligten Mitgliedern</strong> zustande. Weder der Betreiber der
+                    Anwendung noch der Zehlendorfer TSV von 1888 e.V. wird Vertragspartei.</p>
+                    <h3 style="margin-top: 18px;">3. Zahlungen</h3>
+                    <p>Zahlungen erfolgen direkt zwischen den Mitgliedern. Über die Anwendung fließt
+                    kein Geld. Der Betreiber wickelt keine Zahlungen ab, verwahrt keine Gelder und
+                    schuldet keine Rückerstattung.</p>
+                    <h3 style="margin-top: 18px;">4. Ablauf einer Buchung</h3>
+                    <p>Nach der Buchung wird die Stunde reserviert. Erst wenn der Abonnent den
+                    Zahlungseingang bestätigt, gilt sie als verbindlich vergeben. Bleibt die
+                    Bestätigung aus, verfällt die Reservierung nach 48 Stunden und die Stunde wird
+                    wieder freigegeben.</p>
+                    <h3 style="margin-top: 18px;">5. Pflichten der Nutzer</h3>
+                    <p>Abonnenten geben nur Stunden frei, über die sie tatsächlich verfügen, und
+                    hinterlegen zutreffende Zahlungsdaten. Spieler zahlen den vereinbarten Betrag
+                    zeitnah. Beide Seiten halten die Platzordnung des Vereins ein.</p>
+                    <h3 style="margin-top: 18px;">6. Haftung</h3>
+                    <p>Der Betreiber haftet nicht für das Zustandekommen, die Durchführung oder die
+                    Zahlungsabwicklung der zwischen Mitgliedern geschlossenen Vereinbarungen,
+                    insbesondere nicht für ausbleibende Zahlungen oder nicht wahrgenommene Stunden.
+                    Bei Streitigkeiten wenden sich die Beteiligten unmittelbar aneinander. Die Haftung
+                    für Vorsatz und grobe Fahrlässigkeit sowie für Schäden aus der Verletzung von
+                    Leben, Körper oder Gesundheit bleibt unberührt.</p>
+                    <h3 style="margin-top: 18px;">7. Verfügbarkeit</h3>
+                    <p>Es besteht kein Anspruch auf ununterbrochene Verfügbarkeit. Die Anwendung
+                    befindet sich in einer Testphase.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALS -->
     <div id="freigabe-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeFreigabeModal()">
         <div class="modal" onclick="event.stopPropagation()">
@@ -682,6 +811,18 @@
                 stunden.push({ id: id++, platz: 'Platz 1', datum: dateStr, uhrzeit: '19:00-20:00', originalMiete: 28 });
             }
             return stunden;
+        }
+
+        function showRechtsteil(teil) {
+            const teile = { impressum: 'Impressum', datenschutz: 'Datenschutz', nutzung: 'Nutzungsbedingungen' };
+            Object.keys(teile).forEach(k => {
+                document.getElementById('teil-' + k).style.display = (k === teil) ? 'block' : 'none';
+                const tab = document.getElementById('tab-' + k);
+                tab.style.background = (k === teil) ? '#ca8a04' : 'white';
+                tab.style.color = (k === teil) ? 'white' : '#000';
+            });
+            document.getElementById('rechts-untertitel').textContent = teile[teil];
+            document.querySelector('#rechtliches .dashboard-content').scrollTop = 0;
         }
 
         function goToScreen(screen) {
