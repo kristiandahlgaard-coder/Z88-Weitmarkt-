@@ -1066,12 +1066,15 @@
             
             // Mehrfach-Freigabe Button wenn Stunden ausgewählt sind
             if (appState.selectedStunden && appState.selectedStunden.length > 0) {
-                const totalPrice = appState.selectedStunden.reduce((sum, s) => sum + s.originalMiete, 0);
+                const anzahl = appState.selectedStunden.length;
                 calendarList.innerHTML += `
                     <div class="info-banner" style="background: #fef3c7; border-left: 4px solid #ca8a04; margin-top: 16px; padding: 14px; text-align: center;">
-                        <strong>${appState.selectedStunden.length} Stunde(n) ausgewählt</strong><br>
-                        Gesamt-Miete: <strong style="color: #ca8a04;">€${totalPrice.toFixed(2)}</strong><br>
+                        <strong>${anzahl} Stunde${anzahl === 1 ? '' : 'n'} ausgewählt</strong>
+                        <div style="font-size: 12px; color: #666; margin-top: 6px; line-height: 1.6;">
+                            ${appState.selectedStunden.map(s => `${s.datum} · ${s.uhrzeit}`).join('<br>')}
+                        </div>
                         <button class="btn btn-secondary" style="margin-top: 10px; width: 100%;" onclick="openMultiFreigabeModal()">📤 Mehrere Stunden freigeben</button>
+                        <div style="font-size: 11px; color: #666; margin-top: 8px;">Den Preis legst du im nächsten Schritt fest.</div>
                     </div>
                 `;
             }
@@ -1106,7 +1109,9 @@
                         <div class="released-card">
                             <div class="court">${a.platz}</div>
                             <div class="details">${a.datum} • ${a.uhrzeit}</div>
-                            <div class="earn">Du erhältst: €${a.verkaufspreis.toFixed(2)}</div>
+                            <div class="earn">Du erhältst: €${a.verkaufspreis.toFixed(2)}
+                                <span style="font-weight: normal; color: #888; font-size: 12px;">(regulär €${a.originalMiete.toFixed(2)})</span>
+                            </div>
                             <div class="status">Wartet auf Buchung</div>
                         </div>
                     `).join('');
@@ -1248,7 +1253,8 @@
                 <div style="text-align: left; font-size: 13px; margin-bottom: 12px;">
                     ${selected.map(s => `<div style="margin-bottom: 4px; color: #666;">📍 ${s.platz} • ${s.datum} ${s.uhrzeit}</div>`).join('')}
                 </div>
-                <strong>Gesamt-Miete: €${totalPrice.toFixed(2)}</strong>
+                <strong>Regulärer Preis: €${totalPrice.toFixed(2)}</strong>
+                <div style="font-size: 12px; color: #666; margin-top: 4px;">Wähle unten, wie viel du dafür verlangst.</div>
             `;
             
             document.getElementById('freigabe-options').innerHTML = `
