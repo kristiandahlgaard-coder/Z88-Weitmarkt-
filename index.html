@@ -330,6 +330,62 @@
                 <button class="btn btn-primary" onclick="goToScreen('mieter-login')">📅 Ich bin Abonnent</button>
                 <button class="btn btn-secondary" onclick="goToScreen('spieler-login')">🎾 Ich suche einen Platz</button>
             </div>
+            <div style="margin-top: 28px; padding-top: 16px; border-top: 1px solid #333;">
+                <button class="btn btn-outline" style="font-size: 12px; width: 100%;" onclick="goToScreen('platzwart-login')">🔑 Platzbelegung (Trainer / Hallendienst)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLATZWART LOGIN -->
+    <div id="platzwart-login" class="screen login-style login-screen">
+        <div class="login-card">
+            <h1 style="font-size: 32px;">Platzbelegung</h1>
+            <p class="tagline">Trainer / Hallendienst</p>
+            <p class="desc">Übersicht der weitergegebenen Stunden</p>
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Zugangscode</label>
+                    <input type="password" id="platzwart-code" placeholder="••••••">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="handlePlatzwartLogin()">Anmelden</button>
+                <button class="btn btn-secondary" onclick="fillPlatzwartDemo()">Demo-Zugang</button>
+                <button class="btn btn-outline" onclick="goToScreen('initial-login')">← Zurück</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLATZBELEGUNG -->
+    <div id="platzwart-dashboard" class="screen dashboard">
+        <div class="dashboard-header">
+            <div class="dashboard-header-content">
+                <div>
+                    <h1>Platzbelegung</h1>
+                    <div class="user-info">Weitergegebene Stunden</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">🚪 Abmelden</button>
+            </div>
+        </div>
+        <div class="dashboard-content">
+            <div class="dashboard-main">
+                <div class="info-banner" style="background: #fef3c7; border-left: 4px solid #ca8a04; padding: 12px; font-size: 12px; line-height: 1.6; margin-bottom: 18px;">
+                    Hier stehen nur Stunden, die ein Abonnent an ein anderes Mitglied weitergegeben
+                    und deren Zahlung er bestätigt hat. Alle übrigen Buchungen bleiben unverändert
+                    im regulären Buchungssystem.
+                </div>
+
+                <div class="section">
+                    <h2><span class="section-icon">📋</span> Kommende Termine</h2>
+                    <div id="platzwart-liste"></div>
+                </div>
+
+                <div class="section">
+                    <h2><span class="section-icon">📄</span> Für den Aushang</h2>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Liste der nächsten sieben Tage zum Ausdrucken oder Weiterleiten.</p>
+                    <button class="btn btn-secondary" style="width: 100%;" onclick="zeigeWochenuebersicht()">🖨️ Wochenübersicht anzeigen</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -383,6 +439,16 @@
                         <input type="text" id="reg-mitgliedsnummer" placeholder="2024001">
                     </div>
                     <div class="form-group">
+                        <label>Telefonnummer</label>
+                        <input type="tel" id="reg-telefon" placeholder="0170 1234567">
+                        <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Wird nur dem Mitglied angezeigt, das eine deiner Stunden bucht — für Rückfragen zur Zahlung.</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefonnummer</label>
+                        <input type="tel" id="reg-telefon" placeholder="0170 1234567">
+                        <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Wird nur dem Mitglied angezeigt, das eine deiner Stunden bucht — für Rückfragen zur Zahlung.</p>
+                    </div>
+                    <div class="form-group">
                         <label>Passwort</label>
                         <input type="password" id="reg-passwort" placeholder="••••••••">
                     </div>
@@ -431,11 +497,20 @@
             <div class="login-form">
                 <div class="form-group">
                     <label>Dein Name</label>
-                    <input type="text" id="spieler-name" placeholder="Dirk">
+                    <input type="text" id="spieler-name" placeholder="Dirk Schmidt">
                 </div>
                 <div class="form-group">
-                    <label>Email (optional)</label>
+                    <label>Mitgliedsnummer</label>
+                    <input type="text" id="spieler-mitgliedsnummer" placeholder="2024087">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
                     <input type="email" id="spieler-email" placeholder="dirk@example.de">
+                </div>
+                <div class="form-group">
+                    <label>Telefonnummer</label>
+                    <input type="tel" id="spieler-telefon" placeholder="0170 1234567">
+                    <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Wird nur dem Abonnenten angezeigt, dessen Stunde du buchst — für Rückfragen zur Zahlung.</p>
                 </div>
             </div>
             <div class="button-group">
@@ -565,6 +640,11 @@
                             <label>Mitgliedsnummer</label>
                             <input type="text" id="profil-mitgliedsnummer" placeholder="2024001" disabled style="background: #f0f0f0; cursor: not-allowed;">
                         </div>
+                        <div class="form-group">
+                            <label>Telefonnummer</label>
+                            <input type="tel" id="profil-telefon" placeholder="0170 1234567">
+                            <p style="font-size: 11px; color: #666; margin-top: 6px; line-height: 1.5;">Nur für Mitglieder sichtbar, die eine deiner Stunden buchen.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -668,19 +748,30 @@
                     <p>[Vorname Nachname], [Anschrift], [E-Mail]</p>
                     <h3 style="margin-top: 18px;">Welche Daten verarbeitet werden</h3>
                     <p><strong>Bei der Registrierung als Abonnent:</strong> Name, E-Mail-Adresse,
-                    Mitgliedsnummer, Passwort sowie die von Ihnen angegebenen Zahlungsdaten
-                    (IBAN und BIC bzw. PayPal-Name).</p>
-                    <p><strong>Bei der Buchung als Spieler:</strong> Name und E-Mail-Adresse.</p>
+                    Telefonnummer, Mitgliedsnummer, Passwort sowie die von Ihnen angegebenen
+                    Zahlungsdaten (IBAN und BIC bzw. PayPal-Name).</p>
+                    <p><strong>Bei der Buchung als Spieler:</strong> Name, Mitgliedsnummer,
+                    E-Mail-Adresse und Telefonnummer.</p>
                     <p><strong>Bei jeder Vermittlung:</strong> Platz, Datum, Uhrzeit, Preis und die
                     beteiligten Personen.</p>
                     <h3 style="margin-top: 18px;">Zweck und Rechtsgrundlage</h3>
                     <p>Die Verarbeitung dient der Durchführung der Vermittlung und erfolgt auf Grundlage
                     von Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).</p>
                     <h3 style="margin-top: 18px;">Weitergabe Ihrer Daten</h3>
-                    <p>Ihre Zahlungsdaten werden ausschließlich demjenigen Mitglied angezeigt, das eine
-                    von Ihnen freigegebene Stunde bucht — damit dieses den Betrag überweisen kann.
-                    Eine darüber hinausgehende Weitergabe an Dritte findet nicht statt. Insbesondere
-                    werden keine Daten an den Zehlendorfer TSV von 1888 e.V. übermittelt.</p>
+                    <p>Kommt eine Reservierung zustande, werden den beiden beteiligten Mitgliedern
+                    jeweils Name, E-Mail-Adresse und Telefonnummer der anderen Seite angezeigt. Dies
+                    dient der Abwicklung der Zahlung und der Klärung etwaiger Rückfragen. Dem buchenden
+                    Mitglied werden zusätzlich die Zahlungsdaten des Abonnenten angezeigt, damit es den
+                    Betrag überweisen kann.</p>
+                    <p>Eine darüber hinausgehende Weitergabe an Dritte findet nicht statt.</p>
+                    <h3 style="margin-top: 18px;">Einsicht durch Trainer und Hallendienst</h3>
+                    <p>Damit vor Ort nachvollziehbar ist, wer einen Platz nutzt, können Trainer und
+                    Hallendienst des Vereins eine Belegungsübersicht einsehen. Diese enthält
+                    ausschließlich Platz, Datum, Uhrzeit, den Namen des spielenden Mitglieds nebst
+                    Mitgliedsnummer sowie den Namen des Abonnenten.</p>
+                    <p><strong>Nicht einsehbar sind dort:</strong> Preise, Zahlungsdaten,
+                    E-Mail-Adressen und Telefonnummern. Diese Angaben sind für die Platzkontrolle
+                    nicht erforderlich und werden deshalb nicht übermittelt.</p>
                     <h3 style="margin-top: 18px;">Speicherdauer</h3>
                     <p>Ihre Daten werden gelöscht, sobald Ihr Konto gelöscht wird oder der Zweck der
                     Verarbeitung entfällt.</p>
@@ -712,20 +803,47 @@
                     <h3 style="margin-top: 18px;">4. Ablauf einer Buchung</h3>
                     <p>Nach der Buchung wird die Stunde reserviert. Erst wenn der Abonnent den
                     Zahlungseingang bestätigt, gilt sie als verbindlich vergeben. Bleibt die
-                    Bestätigung aus, verfällt die Reservierung nach 48 Stunden und die Stunde wird
-                    wieder freigegeben.</p>
-                    <h3 style="margin-top: 18px;">5. Pflichten der Nutzer</h3>
-                    <p>Abonnenten geben nur Stunden frei, über die sie tatsächlich verfügen, und
-                    hinterlegen zutreffende Zahlungsdaten. Spieler zahlen den vereinbarten Betrag
-                    zeitnah. Beide Seiten halten die Platzordnung des Vereins ein.</p>
-                    <h3 style="margin-top: 18px;">6. Haftung</h3>
+                    Bestätigung aus, verfällt die Reservierung nach 48 Stunden, spätestens jedoch
+                    zwei Stunden vor Spielbeginn, und die Stunde wird wieder freigegeben.</p>
+
+                    <h3 style="margin-top: 18px;">5. Spielberechtigung</h3>
+                    <p><strong>Zum Spielen berechtigt ausschließlich eine bestätigte Buchung.</strong>
+                    Eine bloße Reservierung begründet kein Spielrecht. Wurde der Zahlungseingang nicht
+                    bestätigt, verbleibt die Stunde beim Abonnenten; dieser darf sie selbst nutzen oder
+                    erneut anbieten.</p>
+                    <p>Wer einen Platz ohne bestätigte Buchung belegt, verstößt gegen die Platzordnung
+                    des Vereins. Der Abonnent kann in diesem Fall sein Nutzungsrecht geltend machen.</p>
+                    <p>Trainer und Hallendienst können eine Übersicht der bestätigten Weitergaben
+                    einsehen und die Platznutzung vor Ort abgleichen. Diese enthält Platz, Zeit sowie
+                    die Namen der beteiligten Mitglieder, jedoch keine Preise oder Zahlungsdaten.</p>
+
+                    <h3 style="margin-top: 18px;">6. Pflichten der Nutzer</h3>
+                    <p>Abonnenten geben nur Stunden frei, über die sie tatsächlich verfügen, hinterlegen
+                    zutreffende Zahlungsdaten und bestätigen einen Zahlungseingang zeitnah und
+                    wahrheitsgemäß. Spieler zahlen den vereinbarten Betrag unverzüglich nach der
+                    Reservierung. Beide Seiten machen zutreffende Angaben zu Name, Mitgliedsnummer und
+                    Erreichbarkeit und halten die Platzordnung des Vereins ein.</p>
+
+                    <h3 style="margin-top: 18px;">7. Klärung bei Unstimmigkeiten</h3>
+                    <p>Nach einer Reservierung werden beiden Seiten die Kontaktdaten der jeweils anderen
+                    angezeigt, damit Rückfragen zur Zahlung unmittelbar geklärt werden können. Die
+                    Beteiligten wenden sich zunächst aneinander. Weder der Betreiber noch der Verein
+                    vermitteln in solchen Fällen.</p>
+
+                    <h3 style="margin-top: 18px;">8. Missbrauch</h3>
+                    <p>Bei wiederholten unbezahlten Reservierungen, unzutreffenden Angaben oder der
+                    Belegung von Plätzen ohne bestätigte Buchung kann der Zugang zur Anwendung gesperrt
+                    werden. Vereinsrechtliche Konsequenzen bleiben davon unberührt und liegen allein
+                    beim Verein.</p>
+
+                    <h3 style="margin-top: 18px;">9. Haftung</h3>
                     <p>Der Betreiber haftet nicht für das Zustandekommen, die Durchführung oder die
                     Zahlungsabwicklung der zwischen Mitgliedern geschlossenen Vereinbarungen,
                     insbesondere nicht für ausbleibende Zahlungen oder nicht wahrgenommene Stunden.
-                    Bei Streitigkeiten wenden sich die Beteiligten unmittelbar aneinander. Die Haftung
-                    für Vorsatz und grobe Fahrlässigkeit sowie für Schäden aus der Verletzung von
-                    Leben, Körper oder Gesundheit bleibt unberührt.</p>
-                    <h3 style="margin-top: 18px;">7. Verfügbarkeit</h3>
+                    Die Haftung für Vorsatz und grobe Fahrlässigkeit sowie für Schäden aus der
+                    Verletzung von Leben, Körper oder Gesundheit bleibt unberührt.</p>
+
+                    <h3 style="margin-top: 18px;">10. Verfügbarkeit</h3>
                     <p>Es besteht kein Anspruch auf ununterbrochene Verfügbarkeit. Die Anwendung
                     befindet sich in einer Testphase.</p>
                 </div>
@@ -786,6 +904,7 @@
                     mitgliedsnummer: '2024001',
                     passwort: 'test1234',
                     email: 'max.mueller@example.de',
+                    telefon: '0170 1234567',
                     zahlungsartenPaypal: true,
                     paypalEmail: 'maxmueller88',
                     zahlungsartenUeberweisung: true,
@@ -883,6 +1002,10 @@
                     angebot: { id: Math.random(), platz: 'Platz 1', datum: '14.10.2026', uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller', zahlungsartenUeberweisung: true, zahlungsartenPaypal: true },
                     spielerName: 'Anna Schmidt',
                     spielerEmail: 'anna.schmidt@example.de',
+                    spielerTelefon: '0171 9876543',
+                    spielerMitgliedsnummer: '2024087',
+                    mieterEmail: 'max.mueller@example.de',
+                    mieterTelefon: '0170 1234567',
                     zahlungsart: 'iban',
                     reserviertAm: Date.now() - 3 * 60 * 60 * 1000
                 });
@@ -901,8 +1024,10 @@
                 ];
             }
             
-            appState.currentUser = { name: 'Dirk' };
-            appState.spielerEmail = 'Dirk@z88.de';
+            appState.currentUser = { name: 'Dirk Schmidt' };
+            appState.spielerEmail = 'dirk@z88.de';
+            appState.spielerTelefon = '0172 5551234';
+            appState.spielerMitgliedsnummer = '2024042';
             appState.currentEmail = `guest-dirk`;
             renderSpielerDashboard();
             goToScreen('spieler-dashboard');
@@ -935,6 +1060,7 @@
             const email = document.getElementById('reg-email').value;
             const name = document.getElementById('reg-name').value;
             const mitgliedsnummer = document.getElementById('reg-mitgliedsnummer').value;
+            const telefon = document.getElementById('reg-telefon').value.trim();
             const passwort = document.getElementById('reg-passwort').value;
             const passwortRepeat = document.getElementById('reg-passwort-repeat').value;
             
@@ -947,6 +1073,10 @@
             // Validierung - Grunddaten
             if (!email || !name || !mitgliedsnummer || !passwort) {
                 alert('Alle Felder erforderlich!');
+                return;
+            }
+            if (!telefon) {
+                alert('Bitte gib eine Telefonnummer an — sie wird bei Rückfragen zur Zahlung gebraucht.');
                 return;
             }
             if (passwort !== passwortRepeat) {
@@ -978,6 +1108,7 @@
                 mitgliedsnummer: mitgliedsnummer,
                 passwort: passwort,
                 email: email,
+                telefon: telefon,
                 zahlungsartenPaypal: paypalChecked,
                 paypalEmail: paypalEmail || '',
                 zahlungsartenUeberweisung: ibanChecked,
@@ -995,6 +1126,7 @@
             document.getElementById('reg-email').value = '';
             document.getElementById('reg-name').value = '';
             document.getElementById('reg-mitgliedsnummer').value = '';
+            document.getElementById('reg-telefon').value = '';
             document.getElementById('reg-passwort').value = '';
             document.getElementById('reg-passwort-repeat').value = '';
             document.getElementById('reg-paypal-checkbox').checked = false;
@@ -1010,15 +1142,125 @@
         }
 
         function handleSpielerLogin() {
-            const name = document.getElementById('spieler-name').value;
-            const email = document.getElementById('spieler-email').value;
-            if (!name) { alert('Name erforderlich!'); return; }
-            
+            const name = document.getElementById('spieler-name').value.trim();
+            const mitgliedsnummer = document.getElementById('spieler-mitgliedsnummer').value.trim();
+            const email = document.getElementById('spieler-email').value.trim();
+            const telefon = document.getElementById('spieler-telefon').value.trim();
+
+            if (!name) { alert('Bitte gib deinen Namen an.'); return; }
+            if (!mitgliedsnummer) { alert('Bitte gib deine Mitgliedsnummer an.'); return; }
+            if (!email) { alert('Bitte gib deine E-Mail-Adresse an.'); return; }
+            if (!telefon) { alert('Bitte gib deine Telefonnummer an — der Abonnent braucht sie für Rückfragen zur Zahlung.'); return; }
+
             appState.currentUser = { name };
             appState.spielerEmail = email;
+            appState.spielerTelefon = telefon;
+            appState.spielerMitgliedsnummer = mitgliedsnummer;
             appState.currentEmail = `guest-${Math.random()}`;
             renderSpielerDashboard();
             goToScreen('spieler-dashboard');
+        }
+
+        // ---- Platzbelegung für Trainer / Hallendienst ----
+        // Zeigt bewusst nur Platz, Zeit und Namen — keine Preise, keine Kontakt-
+        // oder Zahlungsdaten. Die sind für die Platzkontrolle nicht erforderlich.
+        const PLATZWART_CODE = 'z88halle';
+
+        function handlePlatzwartLogin() {
+            const code = document.getElementById('platzwart-code').value.trim();
+            if (code !== PLATZWART_CODE) {
+                alert('Zugangscode nicht korrekt.');
+                return;
+            }
+            document.getElementById('platzwart-code').value = '';
+            appState.currentUser = { name: 'Hallendienst' };
+            renderPlatzwartDashboard();
+            goToScreen('platzwart-dashboard');
+        }
+
+        function fillPlatzwartDemo() {
+            if (appState.confirmedListings.length === 0) {
+                const tageSpaeter = n => {
+                    const d = new Date(Date.now() + n * 24 * 60 * 60 * 1000);
+                    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+                };
+                appState.confirmedListings.push(
+                    { id: 'pw1', spielerName: 'Anna Schmidt', spielerMitgliedsnummer: '2024087', spielerEmail: 'anna.schmidt@example.de', zahlungsart: 'iban',
+                      angebot: { id: 901, platz: 'Platz 1', datum: tageSpaeter(1), uhrzeit: '18:00-19:00', originalMiete: 28, verkaufspreis: 14, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' } },
+                    { id: 'pw2', spielerName: 'Thomas König', spielerMitgliedsnummer: '2023015', spielerEmail: 'thomas.koenig@example.de', zahlungsart: 'paypal',
+                      angebot: { id: 902, platz: 'Platz 3', datum: tageSpaeter(3), uhrzeit: '19:00-20:00', originalMiete: 28, verkaufspreis: 21, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' } },
+                    { id: 'pw3', spielerName: 'Julia Werner', spielerMitgliedsnummer: '2025003', spielerEmail: 'julia.werner@example.de', zahlungsart: 'iban',
+                      angebot: { id: 903, platz: 'Platz 2', datum: tageSpaeter(6), uhrzeit: '09:00-10:00', originalMiete: 24, verkaufspreis: 12, mieterId: 'max.mueller@example.de', mieterName: 'Max Müller' } }
+                );
+            }
+            document.getElementById('platzwart-code').value = PLATZWART_CODE;
+            handlePlatzwartLogin();
+        }
+
+        // Bestätigte Weitergaben ab jetzt, chronologisch
+        function kommendeWeitergaben(tageVoraus) {
+            const jetzt = Date.now();
+            const grenze = tageVoraus ? jetzt + tageVoraus * 24 * 60 * 60 * 1000 : Infinity;
+            return appState.confirmedListings
+                .map(c => ({ eintrag: c, beginn: spielbeginnTimestamp(c.angebot) }))
+                .filter(x => x.beginn !== null && x.beginn >= jetzt && x.beginn <= grenze)
+                .sort((a, b) => a.beginn - b.beginn);
+        }
+
+        function renderPlatzwartDashboard() {
+            verfalleneReservierungenAufraeumen();
+            const eintraege = kommendeWeitergaben(null);
+            const liste = document.getElementById('platzwart-liste');
+
+            if (eintraege.length === 0) {
+                liste.innerHTML = '<p style="color: #999; font-size: 13px;">Derzeit sind keine Stunden weitergegeben.</p>';
+                return;
+            }
+
+            liste.innerHTML = eintraege.map(({ eintrag: c, beginn }) => {
+                const tag = new Date(beginn).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' });
+                return `
+                    <div class="sold-card" style="border-left: 4px solid #ca8a04;">
+                        <div class="court">${c.angebot.platz} · ${c.angebot.uhrzeit}</div>
+                        <div class="details">${tag}</div>
+                        <div style="margin-top: 8px; font-size: 13px; line-height: 1.7;">
+                            <div>Spielt: <strong>${c.spielerName}</strong>${c.spielerMitgliedsnummer ? ` <span style="color:#888; font-size:12px;">(Nr. ${c.spielerMitgliedsnummer})</span>` : ''}</div>
+                            <div style="color: #666; font-size: 12px;">Abo von: ${c.angebot.mieterName}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function zeigeWochenuebersicht() {
+            const eintraege = kommendeWeitergaben(7);
+            const inhalt = eintraege.length === 0
+                ? '<p style="font-size: 13px; color: #666;">In den nächsten sieben Tagen sind keine Stunden weitergegeben.</p>'
+                : `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <tr style="background: #f0f0f0;">
+                            <th style="text-align: left; padding: 6px; border: 1px solid #ddd;">Tag</th>
+                            <th style="text-align: left; padding: 6px; border: 1px solid #ddd;">Platz / Zeit</th>
+                            <th style="text-align: left; padding: 6px; border: 1px solid #ddd;">Spielt</th>
+                        </tr>
+                        ${eintraege.map(({ eintrag: c, beginn }) => `
+                            <tr>
+                                <td style="padding: 6px; border: 1px solid #ddd;">${new Date(beginn).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}</td>
+                                <td style="padding: 6px; border: 1px solid #ddd;">${c.angebot.platz}<br>${c.angebot.uhrzeit}</td>
+                                <td style="padding: 6px; border: 1px solid #ddd;">${c.spielerName}<br><span style="color:#888;">statt ${c.angebot.mieterName}</span></td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+
+            document.getElementById('email-content').innerHTML = `
+                <div style="font-size: 13px; line-height: 1.6; color: #333;">
+                    <p style="font-weight: bold; margin-bottom: 4px;">Weitergegebene Stunden — nächste 7 Tage</p>
+                    <p style="font-size: 11px; color: #888; margin-bottom: 12px;">Stand: ${new Date().toLocaleString('de-DE')}</p>
+                    ${inhalt}
+                </div>
+            `;
+            document.getElementById('email-modal').classList.remove('hidden');
         }
 
         function renderMieterDashboard() {
@@ -1091,7 +1333,12 @@
                         <div class="status">Gebucht von: <strong>${r.spielerName}</strong></div>
                         <div class="earn">Erwarteter Eingang: €${r.angebot.verkaufspreis.toFixed(2)}
                             (${r.zahlungsart === 'paypal' ? 'PayPal' : 'Überweisung'})</div>
-                        <div class="status" style="font-size: 12px; color: #666;">Reservierung läuft ab: ${restfristText(r.reserviertAm)}</div>
+                        <div class="status" style="font-size: 12px; color: #666;">Reservierung läuft ab: ${restfristText(r)}</div>
+                        <div style="background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; margin-top: 8px; font-size: 12px; line-height: 1.6;">
+                            <strong>Kontakt bei Rückfragen:</strong><br>
+                            ${r.spielerTelefon ? `📞 <a href="tel:${r.spielerTelefon.replace(/\s/g,'')}" style="color: #ca8a04;">${r.spielerTelefon}</a><br>` : ''}
+                            ✉️ <a href="mailto:${r.spielerEmail}" style="color: #ca8a04;">${r.spielerEmail}</a>
+                        </div>
                         <div style="display: flex; gap: 8px; margin-top: 10px;">
                             <button class="action-btn" style="flex: 1;" onclick="confirmZahlungEingang('${r.id}')">✓ Zahlung erhalten</button>
                             <button class="action-btn" style="flex: 1; background: #eee; color: #333;" onclick="reservierungAblehnen('${r.id}')">Stornieren</button>
@@ -1356,7 +1603,16 @@
                             <div class="details">${r.angebot.datum} • ${r.angebot.uhrzeit}</div>
                             <div class="seller">Von: ${r.angebot.mieterName}</div>
                             <div class="price">€${r.angebot.verkaufspreis.toFixed(2)}</div>
-                            <div style="font-size: 12px; color: #666; margin-top: 6px;">${r.angebot.mieterName} bestätigt den Zahlungseingang — ${restfristText(r.reserviertAm)}</div>
+                            <div style="background: #fef3c7; border-left: 3px solid #ca8a04; padding: 8px 10px; margin-top: 8px; font-size: 12px; line-height: 1.6;">
+                                ⚠️ <strong>Noch nicht bestätigt.</strong> Die Stunde gehört dir erst,
+                                wenn ${r.angebot.mieterName} den Zahlungseingang bestätigt hat — ${restfristText(r)}.
+                            </div>
+                            ${(r.mieterTelefon || r.mieterEmail) ? `
+                            <div style="background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; margin-top: 8px; font-size: 12px; line-height: 1.6;">
+                                <strong>Kontakt bei Rückfragen:</strong><br>
+                                ${r.mieterTelefon ? `📞 <a href="tel:${r.mieterTelefon.replace(/\s/g,'')}" style="color: #ca8a04;">${r.mieterTelefon}</a><br>` : ''}
+                                ${r.mieterEmail ? `✉️ <a href="mailto:${r.mieterEmail}" style="color: #ca8a04;">${r.mieterEmail}</a>` : ''}
+                            </div>` : ''}
                         </div>
                     `).join('')}
                 `;
@@ -1517,7 +1773,9 @@
                 <div style="background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid #ca8a04; margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
                     Der Platz wird für dich <strong>reserviert</strong>, sobald du unten bestätigst.
                     Sobald ${mieter.name || 'der Mieter'} den Zahlungseingang bestätigt, gehört die Stunde dir.
-                    Ohne Bestätigung verfällt die Reservierung nach 48 Stunden.
+                    <br><br>
+                    <strong>Wichtig:</strong> Erst mit dieser Bestätigung darfst du den Platz nutzen.
+                    Ohne Bestätigung verfällt die Reservierung — spätestens zwei Stunden vor Spielbeginn.
                 </div>
                 <button class="btn btn-primary" style="width: 100%;" onclick="confirmPaymentAndBook()">Ich habe bezahlt</button>
                 <button class="btn btn-outline" style="width: 100%; margin-top: 12px; color: #000; border-color: #000;" onclick="closePaymentModal()">Abbrechen</button>
@@ -1579,11 +1837,16 @@
             const gesamtBetrag = angebote.reduce((sum, a) => sum + a.verkaufspreis, 0);
 
             angebote.forEach(a => {
+                const mieter = appState.mieterDB[a.mieterId] || {};
                 appState.reservierungen.push({
                     id: Math.random().toString(36).substr(2, 9),
                     angebot: a,
                     spielerName: appState.currentUser.name,
                     spielerEmail: appState.spielerEmail,
+                    spielerTelefon: appState.spielerTelefon || '',
+                    spielerMitgliedsnummer: appState.spielerMitgliedsnummer || '',
+                    mieterEmail: mieter.email || a.mieterId,
+                    mieterTelefon: mieter.telefon || '',
                     zahlungsart: selectedMethod,
                     reserviertAm: Date.now()
                 });
@@ -1618,19 +1881,47 @@
             document.getElementById('email-modal').classList.remove('hidden');
         }
 
-        // Reservierungen ohne Bestätigung verfallen nach 48h zurück in den Markt
+        // Reservierungen verfallen nach 48h — spätestens jedoch 2h vor Spielbeginn,
+        // damit eine unbezahlte Stunde nicht bis zum Termin blockiert bleibt.
         const RESERVIERUNG_FRIST_MS = 48 * 60 * 60 * 1000;
+        const VORLAUF_VOR_SPIELBEGINN_MS = 2 * 60 * 60 * 1000;
+
+        // "14.10.2026" + "18:00-19:00" -> Timestamp des Spielbeginns
+        function spielbeginnTimestamp(angebot) {
+            try {
+                const [tag, monat, jahr] = angebot.datum.split('.').map(Number);
+                const [stunde, minute] = angebot.uhrzeit.split('-')[0].split(':').map(Number);
+                const d = new Date(jahr, monat - 1, tag, stunde, minute || 0);
+                return isNaN(d.getTime()) ? null : d.getTime();
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Zeitpunkt, zu dem eine Reservierung spätestens verfällt
+        function ablaufZeitpunkt(reservierung) {
+            const nachFrist = reservierung.reserviertAm + RESERVIERUNG_FRIST_MS;
+            const beginn = spielbeginnTimestamp(reservierung.angebot);
+            if (beginn === null) return nachFrist;
+            return Math.min(nachFrist, beginn - VORLAUF_VOR_SPIELBEGINN_MS);
+        }
 
         function verfalleneReservierungenAufraeumen() {
             const jetzt = Date.now();
-            const abgelaufen = appState.reservierungen.filter(r => jetzt - r.reserviertAm > RESERVIERUNG_FRIST_MS);
+            const abgelaufen = appState.reservierungen.filter(r => jetzt > ablaufZeitpunkt(r));
             if (abgelaufen.length === 0) return;
-            abgelaufen.forEach(r => appState.zweitmarktAngebote.push(r.angebot));
-            appState.reservierungen = appState.reservierungen.filter(r => jetzt - r.reserviertAm <= RESERVIERUNG_FRIST_MS);
+            abgelaufen.forEach(r => {
+                // Nur zurück in den Markt, wenn der Termin noch spielbar ist
+                const beginn = spielbeginnTimestamp(r.angebot);
+                if (beginn === null || beginn > jetzt) {
+                    appState.zweitmarktAngebote.push(r.angebot);
+                }
+            });
+            appState.reservierungen = appState.reservierungen.filter(r => jetzt <= ablaufZeitpunkt(r));
         }
 
-        function restfristText(reserviertAm) {
-            const restMs = RESERVIERUNG_FRIST_MS - (Date.now() - reserviertAm);
+        function restfristText(reservierung) {
+            const restMs = ablaufZeitpunkt(reservierung) - Date.now();
             if (restMs <= 0) return 'abgelaufen';
             const stunden = Math.floor(restMs / (60 * 60 * 1000));
             if (stunden >= 1) return `noch ${stunden} Std.`;
@@ -1647,7 +1938,9 @@
                 angebot: r.angebot,
                 spielerName: r.spielerName,
                 spielerEmail: r.spielerEmail,
-                zahlungsart: r.zahlungsart
+                spielerMitgliedsnummer: r.spielerMitgliedsnummer || '',
+                zahlungsart: r.zahlungsart,
+                bestaetigtAm: Date.now()
             });
             appState.reservierungen = appState.reservierungen.filter(x => x.id !== reservierungId);
             renderMieterDashboard();
@@ -1689,6 +1982,7 @@
             document.getElementById('profil-name').value = mieter.name || '';
             document.getElementById('profil-email').value = mieter.email || '';
             document.getElementById('profil-mitgliedsnummer').value = mieter.mitgliedsnummer || '';
+            document.getElementById('profil-telefon').value = mieter.telefon || '';
             document.getElementById('profil-paypal-checkbox').checked = mieter.zahlungsartenPaypal || false;
             document.getElementById('profil-iban-checkbox').checked = mieter.zahlungsartenUeberweisung || false;
             document.getElementById('profil-paypal-email').value = mieter.paypalEmail || '';
@@ -1701,6 +1995,7 @@
 
         function saveProfilChanges() {
             const name = document.getElementById('profil-name').value;
+            const telefon = document.getElementById('profil-telefon').value.trim();
             const paypalChecked = document.getElementById('profil-paypal-checkbox').checked;
             const ibanChecked = document.getElementById('profil-iban-checkbox').checked;
             const paypalEmail = document.getElementById('profil-paypal-email').value;
@@ -1713,6 +2008,10 @@
             // Validierung
             if (!name) {
                 alert('Name erforderlich!');
+                return;
+            }
+            if (!telefon) {
+                alert('Bitte gib eine Telefonnummer an — sie wird bei Rückfragen zur Zahlung gebraucht.');
                 return;
             }
             if (!paypalChecked && !ibanChecked) {
@@ -1748,6 +2047,7 @@
 
             // Daten speichern
             appState.currentUser.name = name;
+            appState.currentUser.telefon = telefon;
             appState.currentUser.zahlungsartenPaypal = paypalChecked;
             appState.currentUser.paypalEmail = paypalEmail;
             appState.currentUser.zahlungsartenUeberweisung = ibanChecked;
@@ -1755,6 +2055,7 @@
             appState.currentUser.bicValue = bicValue;
 
             appState.mieterDB[appState.currentEmail].name = name;
+            appState.mieterDB[appState.currentEmail].telefon = telefon;
             appState.mieterDB[appState.currentEmail].zahlungsartenPaypal = paypalChecked;
             appState.mieterDB[appState.currentEmail].paypalEmail = paypalEmail;
             appState.mieterDB[appState.currentEmail].zahlungsartenUeberweisung = ibanChecked;
@@ -1781,6 +2082,10 @@
             document.getElementById('mieter-login-passwort').value = '';
             document.getElementById('spieler-name').value = '';
             document.getElementById('spieler-email').value = '';
+            document.getElementById('spieler-mitgliedsnummer').value = '';
+            document.getElementById('spieler-telefon').value = '';
+            appState.spielerTelefon = '';
+            appState.spielerMitgliedsnummer = '';
             goToScreen('initial-login');
         }
     </script>
